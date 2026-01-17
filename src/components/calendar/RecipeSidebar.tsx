@@ -65,12 +65,12 @@ export function RecipeSidebar({ recipes }: RecipeSidebarProps) {
               key={filter.value}
               onClick={() => setMealFilter(filter.value)}
               className={`
-                flex-1 py-1.5 text-sm font-medium rounded-lg
-                transition-all duration-200
+                flex-1 min-h-[44px] py-2 text-sm font-medium rounded-lg
+                transition-all duration-200 active:scale-95
                 ${
                   mealFilter === filter.value
                     ? 'bg-olive-500 text-white'
-                    : 'bg-sand-100 text-sand-600 hover:bg-sand-200'
+                    : 'bg-sand-100 text-sand-600 hover:bg-sand-200 active:bg-sand-300'
                 }
               `}
             >

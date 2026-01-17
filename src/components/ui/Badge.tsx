@@ -77,18 +77,19 @@ const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
               onRemove?.();
             }}
             className="
-              -mr-0.5 ml-0.5 p-0.5 rounded-full
-              hover:bg-black/10 transition-colors
+              -mr-1 ml-1 min-w-[28px] min-h-[28px] p-1.5 rounded-full
+              flex items-center justify-center
+              hover:bg-black/10 active:bg-black/20 transition-colors
               focus:outline-none focus-visible:ring-2 focus-visible:ring-current
             "
             aria-label="Remove"
           >
             <svg
-              className="w-3 h-3"
+              className="w-3.5 h-3.5"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
-              strokeWidth={2}
+              strokeWidth={2.5}
             >
               <path
                 strokeLinecap="round"
