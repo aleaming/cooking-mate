@@ -163,7 +163,7 @@ export default function RecipeDetailPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="md:col-span-1"
+            className="md:col-span-1 min-w-0"
           >
             <Card padding="md" className="sticky top-24 space-y-4 sm:space-y-6 sm:p-6">
               <div>
@@ -192,7 +192,7 @@ export default function RecipeDetailPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="md:col-span-2"
+            className="md:col-span-2 min-w-0"
           >
             <Card padding="md" className="sm:p-6">
               <h2 className="font-display text-lg sm:text-xl font-semibold text-olive-900 mb-4 sm:mb-6">
@@ -212,13 +212,13 @@ export default function RecipeDetailPage() {
                     <motion.li
                       key={instruction.step}
                       variants={staggerItem}
-                      className="flex gap-3 sm:gap-4 min-w-0"
+                      className="flex gap-3 sm:gap-4"
                     >
                       <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-olive-100 flex items-center justify-center font-semibold text-olive-700 text-sm sm:text-base">
                         {instruction.step}
                       </div>
-                      <div className="flex-1 min-w-0 pt-0.5 sm:pt-1 overflow-hidden">
-                        <p className="text-olive-800 leading-relaxed text-sm sm:text-base break-words overflow-wrap-anywhere">
+                      <div className="flex-1 min-w-0 pt-0.5 sm:pt-1">
+                        <p className="text-olive-800 leading-relaxed text-sm sm:text-base break-words">
                           {instruction.text}
                         </p>
 
