@@ -9,6 +9,7 @@ import { useCookingLogStore } from '@/stores/useCookingLogStore';
 import { getRecipeById } from '@/data/recipes';
 import { pageVariants, staggerContainer, staggerItem } from '@/lib/constants/animations';
 import { CookingSession, CookingRating, MealSlotType } from '@/types';
+import { IconChefHat } from '@tabler/icons-react';
 
 type DateFilter = 'all' | 'week' | 'month' | 'year';
 type SortBy = 'date' | 'rating';
@@ -179,7 +180,7 @@ export default function CookingHistoryPage() {
             animate={{ opacity: 1 }}
             className="text-center py-16"
           >
-            <div className="text-6xl mb-4">👨‍🍳</div>
+            <IconChefHat size={64} className="mx-auto mb-4 text-sand-400" />
             <h3 className="font-display text-xl font-semibold text-olive-900 mb-2">
               No cooking sessions yet
             </h3>

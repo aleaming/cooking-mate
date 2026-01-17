@@ -1,9 +1,11 @@
 'use client';
 
+import { ComponentType } from 'react';
 import { motion } from 'framer-motion';
 import { MealSlotType, Recipe } from '@/types';
 import { SPRING } from '@/lib/constants/animations';
 import { MarkAsCookedButton } from '@/components/cooking-log';
+import { IconSunrise, IconSun, IconMoon } from '@tabler/icons-react';
 
 interface MealSlotProps {
   mealType: MealSlotType;
@@ -20,10 +22,10 @@ const mealTypeLabels: Record<MealSlotType, string> = {
   dinner: 'Dinner',
 };
 
-const mealTypeIcons: Record<MealSlotType, string> = {
-  breakfast: '🌅',
-  lunch: '☀️',
-  dinner: '🌙',
+const mealTypeIcons: Record<MealSlotType, ComponentType<{ size?: number; className?: string }>> = {
+  breakfast: IconSunrise,
+  lunch: IconSun,
+  dinner: IconMoon,
 };
 
 const mealTypeColors: Record<MealSlotType, { bg: string; border: string; text: string }> = {
@@ -74,7 +76,7 @@ export function MealSlot({ mealType, recipe, date, isOver, onClick, onRemove }: 
               {recipe.name}
             </p>
             <p className="text-[10px] text-sand-500 flex items-center gap-1">
-              <span>{mealTypeIcons[mealType]}</span>
+              {(() => { const Icon = mealTypeIcons[mealType]; return <Icon size={12} className="text-sand-400" />; })()}
               <span>{recipe.totalTimeMinutes} min</span>
             </p>
           </div>
@@ -105,7 +107,7 @@ export function MealSlot({ mealType, recipe, date, isOver, onClick, onRemove }: 
         </div>
       ) : (
         <div className="flex items-center justify-center h-full text-sand-400">
-          <span className="text-xs">{mealTypeIcons[mealType]}</span>
+          {(() => { const Icon = mealTypeIcons[mealType]; return <Icon size={14} className="text-sand-300" />; })()}
         </div>
       )}
     </motion.div>

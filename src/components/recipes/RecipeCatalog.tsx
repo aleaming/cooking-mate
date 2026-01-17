@@ -6,6 +6,7 @@ import { Recipe, MealType, Difficulty, DietaryTag } from '@/types';
 import { RecipeCard } from './RecipeCard';
 import { Input, Badge, Button } from '@/components/ui';
 import { staggerContainer, staggerItem, fadeInUp } from '@/lib/constants/animations';
+import { IconToolsKitchen2 } from '@tabler/icons-react';
 
 interface RecipeCatalogProps {
   recipes: Recipe[];
@@ -253,7 +254,7 @@ export function RecipeCatalog({ recipes, compact = false }: RecipeCatalogProps) 
           animate="animate"
           className="text-center py-12"
         >
-          <div className="text-6xl mb-4">🍽️</div>
+          <IconToolsKitchen2 size={64} className="mx-auto mb-4 text-sand-400" />
           <h3 className="text-lg font-medium text-olive-800 mb-2">
             No recipes found
           </h3>

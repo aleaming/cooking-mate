@@ -1,8 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, ComponentType } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ScalingWarning } from '@/types';
+import {
+  IconAlertTriangle,
+  IconRuler,
+  IconChefHat,
+  IconClock,
+  IconBulb,
+  IconBolt,
+  IconTool,
+} from '@tabler/icons-react';
 
 interface ScalingWarningBannerProps {
   warnings: ScalingWarning[];
@@ -33,19 +42,17 @@ export function ScalingWarningBanner({
     }
   };
 
+  const warningIcons: Record<ScalingWarning['type'], ComponentType<{ size?: number; className?: string }>> = {
+    'minimum-threshold': IconAlertTriangle,
+    'non-linear': IconRuler,
+    'technique-change': IconChefHat,
+    'timing-adjustment': IconClock,
+    'equipment-change': IconTool,
+  };
+
   const getWarningIcon = (type: ScalingWarning['type']) => {
-    switch (type) {
-      case 'minimum-threshold':
-        return '⚠️';
-      case 'non-linear':
-        return '📏';
-      case 'technique-change':
-        return '👨‍🍳';
-      case 'timing-adjustment':
-        return '⏱️';
-      default:
-        return '💡';
-    }
+    const Icon = warningIcons[type] || IconBulb;
+    return <Icon size={14} className="flex-shrink-0" />;
   };
 
   return (
@@ -60,7 +67,7 @@ export function ScalingWarningBanner({
         className="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-amber-100/50 transition-colors"
       >
         <div className="flex items-center gap-2">
-          <span className="text-sm">⚡</span>
+          <IconBolt size={16} className="text-amber-600" />
           <span className="text-sm font-medium text-amber-800">
             {warnings.length} scaling {warnings.length === 1 ? 'tip' : 'tips'}
           </span>
@@ -95,7 +102,7 @@ export function ScalingWarningBanner({
                   className={`p-2 rounded-lg border text-xs ${getWarningColor(warning.type)}`}
                 >
                   <div className="flex items-start gap-2">
-                    <span>{getWarningIcon(warning.type)}</span>
+                    {getWarningIcon(warning.type)}
                     <div>
                       <p className="font-medium">{warning.message}</p>
                       {warning.suggestion && (
@@ -113,7 +120,7 @@ export function ScalingWarningBanner({
                   className={`p-2 rounded-lg border text-xs ${getWarningColor(warning.type)}`}
                 >
                   <div className="flex items-start gap-2">
-                    <span>{getWarningIcon(warning.type)}</span>
+                    {getWarningIcon(warning.type)}
                     <div>
                       <p>
                         <span className="font-medium">{warning.ingredientName}:</span>{' '}

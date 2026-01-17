@@ -1,17 +1,32 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, ComponentType } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import {
+  IconHome,
+  IconBook,
+  IconSalad,
+  IconCalendar,
+  IconShoppingCart,
+  IconChartBar,
+  IconLeaf,
+} from '@tabler/icons-react';
 
-const navItems = [
-  { href: '/', label: 'Home', icon: '🏠' },
-  { href: '/recipes', label: 'Recipes', icon: '📖' },
-  { href: '/pantry-finder', label: 'Pantry Finder', icon: '🥗' },
-  { href: '/calendar', label: 'Meal Plan', icon: '📅' },
-  { href: '/shopping-list', label: 'Shopping List', icon: '🛒' },
-  { href: '/cooking-history', label: 'History', icon: '📊' },
+interface NavItem {
+  href: string;
+  label: string;
+  icon: ComponentType<{ size?: number; className?: string }>;
+}
+
+const navItems: NavItem[] = [
+  { href: '/', label: 'Home', icon: IconHome },
+  { href: '/recipes', label: 'Recipes', icon: IconBook },
+  { href: '/pantry-finder', label: 'Pantry Finder', icon: IconSalad },
+  { href: '/calendar', label: 'Meal Plan', icon: IconCalendar },
+  { href: '/shopping-list', label: 'Shopping List', icon: IconShoppingCart },
+  { href: '/cooking-history', label: 'History', icon: IconChartBar },
 ];
 
 export function Header() {
@@ -54,9 +69,9 @@ export function Header() {
           <Link href="/" className="flex items-center gap-2 min-h-[44px] min-w-[44px]">
             <motion.div
               whileHover={{ rotate: 10 }}
-              className="text-2xl"
+              className="text-olive-600"
             >
-              🫒
+              <IconLeaf size={28} />
             </motion.div>
             <span className="font-display text-xl font-semibold text-olive-800">
               MedDiet
@@ -185,7 +200,7 @@ export function Header() {
                           `}
                           onClick={closeMobileMenu}
                         >
-                          <span className="text-xl">{item.icon}</span>
+                          <item.icon size={24} className={isActive ? 'text-olive-600' : 'text-sand-500'} />
                           <span>{item.label}</span>
                           {isActive && (
                             <motion.div

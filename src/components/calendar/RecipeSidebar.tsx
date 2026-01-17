@@ -1,21 +1,28 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, ComponentType, ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { Recipe, MealType } from '@/types';
 import { DraggableRecipeCard } from './DraggableRecipeCard';
 import { Input } from '@/components/ui';
 import { staggerContainer, staggerItem } from '@/lib/constants/animations';
+import { IconSunrise, IconSun, IconMoon, IconToolsKitchen2 } from '@tabler/icons-react';
 
 interface RecipeSidebarProps {
   recipes: Recipe[];
 }
 
-const mealTypeFilters: { value: MealType | 'all'; label: string }[] = [
+interface MealTypeFilter {
+  value: MealType | 'all';
+  label: string;
+  icon?: ComponentType<{ size?: number; className?: string }>;
+}
+
+const mealTypeFilters: MealTypeFilter[] = [
   { value: 'all', label: 'All' },
-  { value: 'breakfast', label: '🌅' },
-  { value: 'lunch', label: '☀️' },
-  { value: 'dinner', label: '🌙' },
+  { value: 'breakfast', label: '', icon: IconSunrise },
+  { value: 'lunch', label: '', icon: IconSun },
+  { value: 'dinner', label: '', icon: IconMoon },
 ];
 
 export function RecipeSidebar({ recipes }: RecipeSidebarProps) {
@@ -66,7 +73,7 @@ export function RecipeSidebar({ recipes }: RecipeSidebarProps) {
               onClick={() => setMealFilter(filter.value)}
               className={`
                 flex-1 min-h-[44px] py-2 text-sm font-medium rounded-lg
-                transition-all duration-200 active:scale-95
+                transition-all duration-200 active:scale-95 flex items-center justify-center
                 ${
                   mealFilter === filter.value
                     ? 'bg-olive-500 text-white'
@@ -74,7 +81,11 @@ export function RecipeSidebar({ recipes }: RecipeSidebarProps) {
                 }
               `}
             >
-              {filter.label}
+              {filter.icon ? (
+                <filter.icon size={18} className={mealFilter === filter.value ? 'text-white' : 'text-sand-600'} />
+              ) : (
+                filter.label
+              )}
             </button>
           ))}
         </div>
@@ -101,7 +112,7 @@ export function RecipeSidebar({ recipes }: RecipeSidebarProps) {
 
         {filteredRecipes.length === 0 && (
           <div className="text-center py-8 text-sand-500">
-            <p className="text-2xl mb-2">🍽️</p>
+            <IconToolsKitchen2 size={32} className="mx-auto mb-2 text-sand-400" />
             <p className="text-sm">No recipes found</p>
           </div>
         )}

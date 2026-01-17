@@ -1,10 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, ComponentType } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingListByCategory, ShoppingListItem } from '@/types';
 import { ShoppingItem } from './ShoppingItem';
 import { collapseVariants, staggerContainer, staggerItem, SPRING } from '@/lib/constants/animations';
+import {
+  IconLeaf,
+  IconMeat,
+  IconFish,
+  IconMilk,
+  IconBread,
+  IconBox,
+  IconDroplet,
+  IconPlant,
+  IconSeedling,
+  IconGlassFull,
+  IconPackage,
+} from '@tabler/icons-react';
 
 interface ShoppingCategoryProps {
   category: ShoppingListByCategory;
@@ -33,9 +46,7 @@ export function ShoppingCategory({ category, checkedItems, onToggleItem }: Shopp
         className="w-full flex items-center justify-between p-4 hover:bg-sand-50 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <span className="text-lg">
-            {getCategoryEmoji(category.category)}
-          </span>
+          <CategoryIcon category={category.category} />
           <h3 className="font-display font-semibold text-olive-900">
             {category.categoryLabel}
           </h3>
@@ -88,21 +99,23 @@ export function ShoppingCategory({ category, checkedItems, onToggleItem }: Shopp
   );
 }
 
-function getCategoryEmoji(category: string): string {
-  const emojis: Record<string, string> = {
-    produce: '🥬',
-    protein: '🥩',
-    seafood: '🐟',
-    dairy: '🥛',
-    grains: '🍞',
-    pantry: '🥫',
-    'oils-vinegars': '🫒',
-    'herbs-spices': '🌿',
-    'nuts-seeds': '🥜',
-    beverages: '🍷',
-    other: '📦',
-  };
-  return emojis[category] || '📦';
+const categoryIcons: Record<string, ComponentType<{ size?: number; className?: string }>> = {
+  produce: IconLeaf,
+  protein: IconMeat,
+  seafood: IconFish,
+  dairy: IconMilk,
+  grains: IconBread,
+  pantry: IconBox,
+  'oils-vinegars': IconDroplet,
+  'herbs-spices': IconPlant,
+  'nuts-seeds': IconSeedling,
+  beverages: IconGlassFull,
+  other: IconPackage,
+};
+
+function CategoryIcon({ category }: { category: string }) {
+  const Icon = categoryIcons[category] || IconPackage;
+  return <Icon size={20} className="text-olive-600" />;
 }
 
 function ChevronDownIcon({ className }: { className?: string }) {

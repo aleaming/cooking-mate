@@ -67,7 +67,7 @@ export function StarRating({
             aria-label={`${star} star${star > 1 ? 's' : ''}`}
           >
             <motion.svg
-              className={sizeStyles[size]}
+              className={`${sizeStyles[size]} ${isFilled ? 'text-amber-500' : 'text-sand-300'}`}
               viewBox="0 0 24 24"
               fill={isFilled ? 'currentColor' : 'none'}
               stroke="currentColor"
@@ -75,7 +75,6 @@ export function StarRating({
               initial={false}
               animate={{
                 scale: isFilled ? [1, 1.2, 1] : 1,
-                color: isFilled ? '#f59e0b' : '#d1d5db',
               }}
               transition={{ duration: 0.2 }}
             >

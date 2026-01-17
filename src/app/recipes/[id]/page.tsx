@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import { useParams, notFound } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Button, Badge } from '@/components/ui';
+import { Button, Badge, Card } from '@/components/ui';
 import { AddToMealPlanDrawer } from '@/components/recipes/AddToMealPlanDrawer';
 import { RecipeCookingStats } from '@/components/cooking-log';
 import { ServingsSelector, ScaledIngredientsList } from '@/components/scaling';
@@ -12,6 +12,7 @@ import { SimilarRecipesSection, PairingRecipesSection } from '@/components/sugge
 import { getRecipeById } from '@/data/recipes';
 import { scaleRecipe } from '@/lib/utils/recipeScaling';
 import { pageVariants, staggerContainer, staggerItem } from '@/lib/constants/animations';
+import { IconBulb } from '@tabler/icons-react';
 
 export default function RecipeDetailPage() {
   const params = useParams();
@@ -83,11 +84,12 @@ export default function RecipeDetailPage() {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Quick Info Bar */}
-        <motion.div
+        <Card
+          padding="md"
+          className="flex flex-wrap items-center gap-4 mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="flex flex-wrap items-center gap-4 mb-8 p-4 bg-white rounded-2xl shadow-lg shadow-sand-200/50"
         >
           <div className="flex items-center gap-2">
             <ClockIcon className="w-5 h-5 text-sand-500" />
@@ -123,7 +125,7 @@ export default function RecipeDetailPage() {
             <CalendarIcon className="w-4 h-4 mr-2" />
             Add to Plan
           </Button>
-        </motion.div>
+        </Card>
 
         {/* Tags */}
         <motion.div
@@ -158,7 +160,7 @@ export default function RecipeDetailPage() {
             transition={{ delay: 0.4 }}
             className="md:col-span-1"
           >
-            <div className="bg-white rounded-2xl shadow-lg shadow-sand-200/50 p-6 sticky top-24 space-y-6">
+            <Card padding="lg" className="sticky top-24 space-y-6">
               <div>
                 <h2 className="font-display text-xl font-semibold text-olive-900 mb-4">
                   Ingredients
@@ -177,7 +179,7 @@ export default function RecipeDetailPage() {
 
               {/* Cooking Stats */}
               <RecipeCookingStats recipeId={recipe.id} />
-            </div>
+            </Card>
           </motion.div>
 
           {/* Instructions */}
@@ -187,7 +189,7 @@ export default function RecipeDetailPage() {
             transition={{ delay: 0.5 }}
             className="md:col-span-2"
           >
-            <div className="bg-white rounded-2xl shadow-lg shadow-sand-200/50 p-6">
+            <Card padding="lg">
               <h2 className="font-display text-xl font-semibold text-olive-900 mb-6">
                 Instructions
               </h2>
@@ -212,15 +214,16 @@ export default function RecipeDetailPage() {
                         {instruction.text}
                       </p>
                       {instruction.tip && (
-                        <p className="mt-2 text-sm text-aegean-600 bg-aegean-50 p-2 rounded-lg">
-                          💡 {instruction.tip}
+                        <p className="mt-2 text-sm text-aegean-600 bg-aegean-50 p-2 rounded-lg flex items-start gap-1.5">
+                          <IconBulb size={16} className="flex-shrink-0 mt-0.5" />
+                          <span>{instruction.tip}</span>
                         </p>
                       )}
                     </div>
                   </motion.li>
                 ))}
               </motion.ol>
-            </div>
+            </Card>
 
             {/* Tips */}
             {recipe.tips && (
@@ -231,7 +234,7 @@ export default function RecipeDetailPage() {
                 className="mt-6 bg-olive-50 rounded-2xl p-6"
               >
                 <h3 className="font-display font-semibold text-olive-900 mb-2 flex items-center gap-2">
-                  <span className="text-lg">💡</span>
+                  <IconBulb size={20} className="text-olive-600" />
                   Tips
                 </h3>
                 <p className="text-olive-700">{recipe.tips}</p>
@@ -240,11 +243,12 @@ export default function RecipeDetailPage() {
 
             {/* Nutrition */}
             {recipe.nutrition && (
-              <motion.div
+              <Card
+                padding="lg"
+                className="mt-6"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.7 }}
-                className="mt-6 bg-white rounded-2xl shadow-lg shadow-sand-200/50 p-6"
               >
                 <h3 className="font-display font-semibold text-olive-900 mb-4">
                   Nutrition (per serving)
@@ -255,7 +259,7 @@ export default function RecipeDetailPage() {
                   <NutritionItem label="Carbs" value={recipe.nutrition.carbohydrates} unit="g" />
                   <NutritionItem label="Fat" value={recipe.nutrition.fat} unit="g" />
                 </div>
-              </motion.div>
+              </Card>
             )}
 
             {/* Pairs Well With */}

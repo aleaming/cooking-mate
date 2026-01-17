@@ -6,6 +6,7 @@ import { Button } from '@/components/ui';
 import { RecipeCard } from '@/components/recipes';
 import { getFeaturedRecipes } from '@/data/recipes';
 import { pageVariants, staggerContainer, staggerItem } from '@/lib/constants/animations';
+import { IconBook, IconCalendar, IconShoppingCart, IconLeaf } from '@tabler/icons-react';
 
 export default function HomePage() {
   const featuredRecipes = getFeaturedRecipes();
@@ -89,8 +90,8 @@ export default function HomePage() {
             className="grid md:grid-cols-3 gap-8"
           >
             <motion.div variants={staggerItem} className="text-center">
-              <div className="w-16 h-16 mx-auto bg-olive-100 rounded-2xl flex items-center justify-center text-3xl mb-4">
-                📚
+              <div className="w-16 h-16 mx-auto bg-olive-100 rounded-2xl flex items-center justify-center mb-4">
+                <IconBook size={32} className="text-olive-600" />
               </div>
               <h3 className="font-display text-xl font-semibold text-olive-900 mb-2">
                 Curated Recipes
@@ -102,8 +103,8 @@ export default function HomePage() {
             </motion.div>
 
             <motion.div variants={staggerItem} className="text-center">
-              <div className="w-16 h-16 mx-auto bg-terracotta-100 rounded-2xl flex items-center justify-center text-3xl mb-4">
-                📅
+              <div className="w-16 h-16 mx-auto bg-terracotta-100 rounded-2xl flex items-center justify-center mb-4">
+                <IconCalendar size={32} className="text-terracotta-600" />
               </div>
               <h3 className="font-display text-xl font-semibold text-olive-900 mb-2">
                 Easy Meal Planning
@@ -115,8 +116,8 @@ export default function HomePage() {
             </motion.div>
 
             <motion.div variants={staggerItem} className="text-center">
-              <div className="w-16 h-16 mx-auto bg-aegean-100 rounded-2xl flex items-center justify-center text-3xl mb-4">
-                🛒
+              <div className="w-16 h-16 mx-auto bg-aegean-100 rounded-2xl flex items-center justify-center mb-4">
+                <IconShoppingCart size={32} className="text-aegean-600" />
               </div>
               <h3 className="font-display text-xl font-semibold text-olive-900 mb-2">
                 Smart Shopping Lists
@@ -198,8 +199,8 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="py-8 border-t border-sand-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sand-500 text-sm">
-          <p>
-            Made with 🫒 for healthy eating enthusiasts
+          <p className="flex items-center justify-center gap-1">
+            Made with <IconLeaf size={16} className="text-olive-500" /> for healthy eating enthusiasts
           </p>
         </div>
       </footer>

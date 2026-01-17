@@ -6,6 +6,7 @@ import { ShoppingListByCategory } from '@/types';
 import { ShoppingCategory } from './ShoppingCategory';
 import { Button } from '@/components/ui';
 import { staggerContainer, staggerItem } from '@/lib/constants/animations';
+import { IconShoppingCart, IconConfetti } from '@tabler/icons-react';
 
 interface ShoppingListProps {
   categories: ShoppingListByCategory[];
@@ -44,7 +45,7 @@ export function ShoppingList({
         animate={{ opacity: 1, y: 0 }}
         className="text-center py-16"
       >
-        <div className="text-6xl mb-4">🛒</div>
+        <IconShoppingCart size={64} className="mx-auto mb-4 text-sand-400" />
         <h3 className="text-lg font-medium text-olive-800 mb-2">
           No items on your shopping list
         </h3>
@@ -116,7 +117,7 @@ export function ShoppingList({
           animate={{ opacity: 1, scale: 1 }}
           className="text-center py-8 bg-olive-50 rounded-2xl"
         >
-          <div className="text-4xl mb-2">🎉</div>
+          <IconConfetti size={40} className="mx-auto mb-2 text-olive-600" />
           <p className="font-medium text-olive-800">
             Shopping complete! You got everything.
           </p>

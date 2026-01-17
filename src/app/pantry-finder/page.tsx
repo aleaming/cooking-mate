@@ -13,6 +13,7 @@ import { findMatchingRecipes } from '@/lib/utils/ingredientMatching';
 import { getMasterIngredients } from '@/lib/data/masterIngredients';
 import { MasterIngredient } from '@/types';
 import { pageVariants, staggerContainer, staggerItem } from '@/lib/constants/animations';
+import { IconSalad, IconChefHat } from '@tabler/icons-react';
 
 export default function PantryFinderPage() {
   const [selectedIngredients, setSelectedIngredients] = useState<Map<string, MasterIngredient>>(
@@ -203,7 +204,7 @@ export default function PantryFinderPage() {
                 </motion.div>
               ) : (
                 <div className="text-center py-16 bg-white rounded-2xl">
-                  <div className="text-5xl mb-4">🥗</div>
+                  <IconSalad size={56} className="mx-auto mb-4 text-sand-400" />
                   <h3 className="font-display text-xl font-semibold text-olive-900 mb-2">
                     No matches yet
                   </h3>
@@ -234,7 +235,7 @@ export default function PantryFinderPage() {
             transition={{ delay: 0.3 }}
             className="text-center py-16 bg-white rounded-2xl shadow-sm"
           >
-            <div className="text-6xl mb-4">🧑‍🍳</div>
+            <IconChefHat size={64} className="mx-auto mb-4 text-sand-400" />
             <h3 className="font-display text-xl font-semibold text-olive-900 mb-2">
               What&apos;s in your kitchen?
             </h3>
