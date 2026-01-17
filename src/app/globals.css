@@ -1,26 +1,172 @@
 @import "tailwindcss";
 
+/* Mediterranean Diet Planner - Custom Theme */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Background & Foreground */
+  --background: #faf9f7;
+  --foreground: #3d432e;
+
+  /* Primary - Olive (organic, natural) */
+  --olive-50: #f7f8f3;
+  --olive-100: #eef0e6;
+  --olive-200: #dde2cd;
+  --olive-300: #c4ccaa;
+  --olive-400: #a7b283;
+  --olive-500: #8a9962;
+  --olive-600: #6f7b4d;
+  --olive-700: #56603d;
+  --olive-800: #474f34;
+  --olive-900: #3d432e;
+
+  /* Secondary - Terracotta (warm Mediterranean) */
+  --terracotta-50: #fdf6f3;
+  --terracotta-100: #fbeae3;
+  --terracotta-200: #f7d5c7;
+  --terracotta-300: #f0b8a1;
+  --terracotta-400: #e6916f;
+  --terracotta-500: #d97046;
+  --terracotta-600: #c55a35;
+  --terracotta-700: #a4472b;
+  --terracotta-800: #863c28;
+  --terracotta-900: #6e3525;
+
+  /* Accent - Aegean (Mediterranean sea) */
+  --aegean-50: #f0f9ff;
+  --aegean-100: #e0f2fe;
+  --aegean-200: #b9e5fe;
+  --aegean-300: #7cd1fd;
+  --aegean-400: #36bafa;
+  --aegean-500: #0c9feb;
+  --aegean-600: #0080cc;
+  --aegean-700: #0166a5;
+  --aegean-800: #065688;
+  --aegean-900: #0b4770;
+
+  /* Neutral - Sand (warm grays) */
+  --sand-50: #faf9f7;
+  --sand-100: #f5f3ef;
+  --sand-200: #e8e4dc;
+  --sand-300: #d9d2c5;
+  --sand-400: #c4b9a7;
+  --sand-500: #b0a28d;
+  --sand-600: #9d8b74;
+  --sand-700: #837361;
+  --sand-800: #6c5f52;
+  --sand-900: #594f45;
+
+  /* Semantic */
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --error: #ef4444;
 }
 
 @theme inline {
+  /* Base colors */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  /* Olive palette */
+  --color-olive-50: var(--olive-50);
+  --color-olive-100: var(--olive-100);
+  --color-olive-200: var(--olive-200);
+  --color-olive-300: var(--olive-300);
+  --color-olive-400: var(--olive-400);
+  --color-olive-500: var(--olive-500);
+  --color-olive-600: var(--olive-600);
+  --color-olive-700: var(--olive-700);
+  --color-olive-800: var(--olive-800);
+  --color-olive-900: var(--olive-900);
+
+  /* Terracotta palette */
+  --color-terracotta-50: var(--terracotta-50);
+  --color-terracotta-100: var(--terracotta-100);
+  --color-terracotta-200: var(--terracotta-200);
+  --color-terracotta-300: var(--terracotta-300);
+  --color-terracotta-400: var(--terracotta-400);
+  --color-terracotta-500: var(--terracotta-500);
+  --color-terracotta-600: var(--terracotta-600);
+  --color-terracotta-700: var(--terracotta-700);
+  --color-terracotta-800: var(--terracotta-800);
+  --color-terracotta-900: var(--terracotta-900);
+
+  /* Aegean palette */
+  --color-aegean-50: var(--aegean-50);
+  --color-aegean-100: var(--aegean-100);
+  --color-aegean-200: var(--aegean-200);
+  --color-aegean-300: var(--aegean-300);
+  --color-aegean-400: var(--aegean-400);
+  --color-aegean-500: var(--aegean-500);
+  --color-aegean-600: var(--aegean-600);
+  --color-aegean-700: var(--aegean-700);
+  --color-aegean-800: var(--aegean-800);
+  --color-aegean-900: var(--aegean-900);
+
+  /* Sand palette */
+  --color-sand-50: var(--sand-50);
+  --color-sand-100: var(--sand-100);
+  --color-sand-200: var(--sand-200);
+  --color-sand-300: var(--sand-300);
+  --color-sand-400: var(--sand-400);
+  --color-sand-500: var(--sand-500);
+  --color-sand-600: var(--sand-600);
+  --color-sand-700: var(--sand-700);
+  --color-sand-800: var(--sand-800);
+  --color-sand-900: var(--sand-900);
+
+  /* Semantic colors */
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+
+  /* Typography */
+  --font-display: "Playfair Display", serif;
+  --font-body: "Inter", sans-serif;
+  --font-sans: var(--font-body);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* Google Fonts - loaded via layout.tsx */
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus styles for accessibility */
+*:focus-visible {
+  outline: 2px solid var(--olive-500);
+  outline-offset: 2px;
+}
+
+/* Selection colors */
+::selection {
+  background-color: var(--olive-200);
+  color: var(--olive-900);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--sand-100);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--sand-400);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--sand-500);
 }

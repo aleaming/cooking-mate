@@ -1,0 +1,113 @@
+'use client';
+
+import { useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { createPortal } from 'react-dom';
+import { modalBackdrop, modalContent } from '@/lib/constants/animations';
+
+interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title?: string;
+  children: React.ReactNode;
+  size?: 'sm' | 'md' | 'lg';
+}
+
+const sizeStyles = {
+  sm: 'max-w-sm',
+  md: 'max-w-md',
+  lg: 'max-w-lg',
+};
+
+export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalProps) {
+  // Handle escape key
+  const handleEscape = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    },
+    [onClose]
+  );
+
+  useEffect(() => {
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, handleEscape]);
+
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  return createPortal(
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <motion.div
+            variants={modalBackdrop}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            onClick={onClose}
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+          />
+
+          {/* Modal Content */}
+          <motion.div
+            variants={modalContent}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className={`
+              relative w-full ${sizeStyles[size]}
+              bg-white rounded-2xl shadow-2xl
+              max-h-[90vh] overflow-hidden
+            `}
+          >
+            {/* Header */}
+            {title && (
+              <div className="flex items-center justify-between p-4 border-b border-sand-200">
+                <h2 className="font-display text-lg font-semibold text-olive-900">
+                  {title}
+                </h2>
+                <button
+                  onClick={onClose}
+                  className="p-1 rounded-lg hover:bg-sand-100 transition-colors"
+                  aria-label="Close modal"
+                >
+                  <svg
+                    className="w-5 h-5 text-sand-500"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+            )}
+
+            {/* Body */}
+            <div className="p-4 overflow-y-auto max-h-[calc(90vh-120px)]">
+              {children}
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>,
+    document.body
+  );
+}
