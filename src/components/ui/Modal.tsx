@@ -14,9 +14,9 @@ interface ModalProps {
 }
 
 const sizeStyles = {
-  sm: 'max-w-sm',
-  md: 'max-w-md',
-  lg: 'max-w-lg',
+  sm: 'max-w-[calc(100%-2rem)] sm:max-w-sm',
+  md: 'max-w-[calc(100%-2rem)] sm:max-w-md',
+  lg: 'max-w-[calc(100%-2rem)] sm:max-w-lg',
 };
 
 export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalProps) {
@@ -80,7 +80,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
                 </h2>
                 <button
                   onClick={onClose}
-                  className="p-1 rounded-lg hover:bg-sand-100 transition-colors"
+                  className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl hover:bg-sand-100 active:bg-sand-200 transition-colors -mr-2"
                   aria-label="Close modal"
                 >
                   <svg

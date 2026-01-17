@@ -73,10 +73,14 @@ export function Drawer({ isOpen, onClose, title, children, height = '75%' }: Dra
               flex flex-col overflow-hidden
             `}
           >
-            {/* Drag Handle */}
-            <div className="flex justify-center pt-3 pb-2">
+            {/* Drag Handle - increased tap area */}
+            <button
+              onClick={onClose}
+              className="flex justify-center w-full py-3 cursor-grab active:cursor-grabbing"
+              aria-label="Close drawer"
+            >
               <div className="w-12 h-1.5 rounded-full bg-sand-300" />
-            </div>
+            </button>
 
             {/* Header */}
             {title && (
@@ -86,7 +90,7 @@ export function Drawer({ isOpen, onClose, title, children, height = '75%' }: Dra
                 </h2>
                 <button
                   onClick={onClose}
-                  className="p-2 rounded-xl hover:bg-sand-100 transition-colors"
+                  className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl hover:bg-sand-100 active:bg-sand-200 transition-colors -mr-2"
                   aria-label="Close drawer"
                 >
                   <svg

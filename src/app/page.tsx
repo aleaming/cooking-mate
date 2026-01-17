@@ -46,16 +46,16 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="mt-8 flex flex-wrap gap-4"
+              className="mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4"
             >
-              <Link href="/calendar">
-                <Button size="lg">
+              <Link href="/calendar" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full sm:w-auto justify-center">
                   Start Planning
                   <ArrowRightIcon className="w-5 h-5 ml-1" />
                 </Button>
               </Link>
-              <Link href="/recipes">
-                <Button variant="outline" size="lg">
+              <Link href="/recipes" className="w-full sm:w-auto">
+                <Button variant="outline" size="lg" className="w-full sm:w-auto justify-center">
                   Browse Recipes
                 </Button>
               </Link>
@@ -63,18 +63,18 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Decorative elements */}
+        {/* Decorative elements - hidden on mobile to prevent scroll overflow */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 0.1, scale: 1 }}
           transition={{ delay: 0.5, duration: 0.8 }}
-          className="absolute -top-20 -right-20 w-96 h-96 bg-olive-500 rounded-full blur-3xl"
+          className="hidden sm:block absolute -top-20 -right-20 w-96 h-96 bg-olive-500 rounded-full blur-3xl pointer-events-none"
         />
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 0.1, scale: 1 }}
           transition={{ delay: 0.6, duration: 0.8 }}
-          className="absolute -bottom-20 -left-20 w-80 h-80 bg-terracotta-500 rounded-full blur-3xl"
+          className="hidden sm:block absolute -bottom-20 -left-20 w-80 h-80 bg-terracotta-500 rounded-full blur-3xl pointer-events-none"
         />
       </section>
 
@@ -133,16 +133,16 @@ export default function HomePage() {
       {/* Featured Recipes Section */}
       <section className="py-16 lg:py-24 bg-sand-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-end justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
             <div>
-              <h2 className="font-display text-3xl font-bold text-olive-900">
+              <h2 className="font-display text-2xl sm:text-3xl font-bold text-olive-900">
                 Featured Recipes
               </h2>
               <p className="mt-2 text-sand-600">
                 Start with these crowd favorites
               </p>
             </div>
-            <Link href="/recipes">
+            <Link href="/recipes" className="self-start sm:self-auto">
               <Button variant="ghost" size="sm">
                 View all
                 <ArrowRightIcon className="w-4 h-4 ml-1" />

@@ -102,13 +102,14 @@ export default function ShoppingListPage() {
             </div>
 
             {/* Date Range Selector */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 overflow-x-auto pb-2 -mb-2 sm:pb-0 sm:mb-0 sm:overflow-visible">
               {dateRangeOptions.map((option) => (
                 <Button
                   key={option.value}
                   variant={selectedRange === option.value ? 'primary' : 'outline'}
                   size="sm"
                   onClick={() => handleRangeChange(option.value)}
+                  className="whitespace-nowrap flex-shrink-0"
                 >
                   {option.label}
                 </Button>

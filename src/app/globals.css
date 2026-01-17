@@ -170,3 +170,74 @@ html {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--sand-500);
 }
+
+/* Mobile touch optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* Improve tap highlight on mobile */
+  * {
+    -webkit-tap-highlight-color: rgba(138, 153, 98, 0.1);
+  }
+
+  /* Ensure minimum tap targets on interactive elements */
+  button,
+  a,
+  [role="button"],
+  input[type="checkbox"],
+  input[type="radio"],
+  select {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Inline links don't need minimum dimensions */
+  p a,
+  span a,
+  li a:not(.block) {
+    min-height: unset;
+    min-width: unset;
+  }
+
+  /* Disable hover effects on touch devices for better performance */
+  .hover\:bg-sand-100:hover,
+  .hover\:bg-sand-200:hover,
+  .hover\:bg-olive-50:hover {
+    background-color: inherit;
+  }
+
+  /* Use active states instead on touch */
+  .active\:bg-sand-100:active,
+  .active\:bg-sand-200:active,
+  .active\:bg-sand-300:active {
+    transition-duration: 50ms;
+  }
+}
+
+/* Prevent text selection on interactive elements */
+button,
+[role="button"] {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Ensure touch actions work properly for draggable elements */
+[data-draggable="true"] {
+  touch-action: none;
+}
+
+/* Improve scrolling performance */
+.overflow-y-auto,
+.overflow-x-auto,
+.overflow-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Safe area insets for notched devices */
+@supports (padding: max(0px)) {
+  .pb-safe {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .fixed.bottom-4 {
+    bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
