@@ -241,3 +241,19 @@ button,
     bottom: max(1rem, env(safe-area-inset-bottom));
   }
 }
+
+/* Text overflow utilities */
+.overflow-wrap-anywhere {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Hide scrollbar utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

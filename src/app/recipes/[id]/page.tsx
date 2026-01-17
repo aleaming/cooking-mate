@@ -5,12 +5,13 @@ import { useParams, notFound } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Button, Badge, Card } from '@/components/ui';
-import { AddToMealPlanDrawer } from '@/components/recipes/AddToMealPlanDrawer';
+import { AddToMealPlanDrawer, TimerButton } from '@/components/recipes';
 import { RecipeCookingStats } from '@/components/cooking-log';
 import { ServingsSelector, ScaledIngredientsList } from '@/components/scaling';
 import { SimilarRecipesSection, PairingRecipesSection } from '@/components/suggestions';
 import { getRecipeById } from '@/data/recipes';
 import { scaleRecipe } from '@/lib/utils/recipeScaling';
+import { parseTimeFromText } from '@/lib/utils/timer';
 import { pageVariants, staggerContainer, staggerItem } from '@/lib/constants/animations';
 import { IconBulb } from '@tabler/icons-react';
 
@@ -204,28 +205,40 @@ export default function RecipeDetailPage() {
                 animate="animate"
                 className="space-y-6"
               >
-                {recipe.instructions.map((instruction) => (
-                  <motion.li
-                    key={instruction.step}
-                    variants={staggerItem}
-                    className="flex gap-3 sm:gap-4"
-                  >
-                    <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-olive-100 flex items-center justify-center font-semibold text-olive-700 text-sm sm:text-base">
-                      {instruction.step}
-                    </div>
-                    <div className="flex-1 min-w-0 pt-0.5 sm:pt-1">
-                      <p className="text-olive-800 leading-relaxed text-sm sm:text-base break-words">
-                        {instruction.text}
-                      </p>
-                      {instruction.tip && (
-                        <p className="mt-2 text-xs sm:text-sm text-aegean-600 bg-aegean-50 p-2 rounded-lg flex items-start gap-1.5 break-words">
-                          <IconBulb size={16} className="flex-shrink-0 mt-0.5" />
-                          <span className="min-w-0">{instruction.tip}</span>
+                {recipe.instructions.map((instruction) => {
+                  const timerConfig = parseTimeFromText(instruction.text);
+
+                  return (
+                    <motion.li
+                      key={instruction.step}
+                      variants={staggerItem}
+                      className="flex gap-3 sm:gap-4 min-w-0"
+                    >
+                      <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-olive-100 flex items-center justify-center font-semibold text-olive-700 text-sm sm:text-base">
+                        {instruction.step}
+                      </div>
+                      <div className="flex-1 min-w-0 pt-0.5 sm:pt-1 overflow-hidden">
+                        <p className="text-olive-800 leading-relaxed text-sm sm:text-base break-words overflow-wrap-anywhere">
+                          {instruction.text}
                         </p>
-                      )}
-                    </div>
-                  </motion.li>
-                ))}
+
+                        {/* Timer button - shown when instruction contains a time */}
+                        {timerConfig && (
+                          <div className="mt-2">
+                            <TimerButton config={timerConfig} />
+                          </div>
+                        )}
+
+                        {instruction.tip && (
+                          <p className="mt-2 text-xs sm:text-sm text-aegean-600 bg-aegean-50 p-2 rounded-lg flex items-start gap-1.5 min-w-0">
+                            <IconBulb size={16} className="flex-shrink-0 mt-0.5" />
+                            <span className="min-w-0 break-words overflow-wrap-anywhere">{instruction.tip}</span>
+                          </p>
+                        )}
+                      </div>
+                    </motion.li>
+                  );
+                })}
               </motion.ol>
             </Card>
 
@@ -241,7 +254,7 @@ export default function RecipeDetailPage() {
                   <IconBulb size={20} className="text-olive-600 flex-shrink-0" />
                   Tips
                 </h3>
-                <p className="text-olive-700 text-sm sm:text-base break-words">{recipe.tips}</p>
+                <p className="text-olive-700 text-sm sm:text-base break-words overflow-wrap-anywhere">{recipe.tips}</p>
               </motion.div>
             )}
 
