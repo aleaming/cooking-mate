@@ -45,17 +45,17 @@ export function ServingsSelector({
   return (
     <div className="space-y-3">
       {/* Preset Buttons */}
-      <div className="flex gap-1">
+      <div className="flex gap-2">
         {presets.map((preset) => (
           <motion.button
             key={preset.label}
             type="button"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             transition={SPRING.gentle}
             onClick={() => handlePresetClick(preset)}
             className={`
-              px-2.5 py-1 text-xs font-medium rounded-lg transition-colors
+              flex-1 py-2 text-xs font-medium rounded-lg transition-colors
               ${isPresetActive(preset)
                 ? 'bg-olive-500 text-white'
                 : 'bg-sand-100 text-sand-600 hover:bg-sand-200'
@@ -68,7 +68,7 @@ export function ServingsSelector({
       </div>
 
       {/* Custom Selector */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between">
         <motion.button
           type="button"
           whileHover={{ scale: 1.1 }}
