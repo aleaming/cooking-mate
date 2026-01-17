@@ -37,7 +37,7 @@ export default function RecipeDetailPage() {
       initial="initial"
       animate="animate"
       exit="exit"
-      className="min-h-screen bg-sand-50"
+      className="min-h-screen bg-sand-50 overflow-x-hidden"
     >
       {/* Hero Section */}
       <div className="relative h-64 md:h-80 lg:h-96 bg-gradient-to-br from-olive-100 to-sand-100">
@@ -61,12 +61,12 @@ export default function RecipeDetailPage() {
         </div>
 
         {/* Recipe Title */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 text-white">
           <div className="max-w-4xl mx-auto">
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="font-display text-3xl md:text-4xl font-bold mb-2"
+              className="font-display text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2"
             >
               {recipe.name}
             </motion.h1>
@@ -74,7 +74,7 @@ export default function RecipeDetailPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-white/90 max-w-2xl"
+              className="text-white/90 max-w-2xl text-sm sm:text-base line-clamp-2 sm:line-clamp-none"
             >
               {recipe.description}
             </motion.p>
@@ -86,45 +86,49 @@ export default function RecipeDetailPage() {
         {/* Quick Info Bar */}
         <Card
           padding="md"
-          className="flex flex-wrap items-center gap-4 mb-8"
+          className="mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <div className="flex items-center gap-2">
-            <ClockIcon className="w-5 h-5 text-sand-500" />
-            <div>
-              <p className="text-xs text-sand-500">Total Time</p>
-              <p className="font-medium text-olive-900">{recipe.totalTimeMinutes} min</p>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            {/* Stats Row */}
+            <div className="flex items-center justify-between sm:justify-start sm:gap-6 flex-1">
+              <div className="flex items-center gap-2">
+                <ClockIcon className="w-5 h-5 text-sand-500 flex-shrink-0" />
+                <div>
+                  <p className="text-xs text-sand-500">Time</p>
+                  <p className="font-medium text-olive-900 text-sm sm:text-base">{recipe.totalTimeMinutes} min</p>
+                </div>
+              </div>
+
+              <div className="hidden sm:block w-px h-8 bg-sand-200" />
+
+              <div className="flex items-center gap-2">
+                <UsersIcon className="w-5 h-5 text-sand-500 flex-shrink-0" />
+                <div>
+                  <p className="text-xs text-sand-500">Servings</p>
+                  <p className="font-medium text-olive-900 text-sm sm:text-base">{targetServings}</p>
+                </div>
+              </div>
+
+              <div className="hidden sm:block w-px h-8 bg-sand-200" />
+
+              <div className="flex items-center gap-2">
+                <ChefHatIcon className="w-5 h-5 text-sand-500 flex-shrink-0" />
+                <div>
+                  <p className="text-xs text-sand-500">Difficulty</p>
+                  <p className="font-medium text-olive-900 capitalize text-sm sm:text-base">{recipe.difficulty}</p>
+                </div>
+              </div>
             </div>
+
+            {/* Add to Plan Button */}
+            <Button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto">
+              <CalendarIcon className="w-4 h-4 mr-2" />
+              Add to Plan
+            </Button>
           </div>
-
-          <div className="w-px h-8 bg-sand-200" />
-
-          <div className="flex items-center gap-2">
-            <UsersIcon className="w-5 h-5 text-sand-500" />
-            <div>
-              <p className="text-xs text-sand-500">Servings</p>
-              <p className="font-medium text-olive-900">{targetServings}</p>
-            </div>
-          </div>
-
-          <div className="w-px h-8 bg-sand-200" />
-
-          <div className="flex items-center gap-2">
-            <ChefHatIcon className="w-5 h-5 text-sand-500" />
-            <div>
-              <p className="text-xs text-sand-500">Difficulty</p>
-              <p className="font-medium text-olive-900 capitalize">{recipe.difficulty}</p>
-            </div>
-          </div>
-
-          <div className="flex-1" />
-
-          <Button onClick={() => setIsModalOpen(true)}>
-            <CalendarIcon className="w-4 h-4 mr-2" />
-            Add to Plan
-          </Button>
         </Card>
 
         {/* Tags */}
@@ -160,9 +164,9 @@ export default function RecipeDetailPage() {
             transition={{ delay: 0.4 }}
             className="md:col-span-1"
           >
-            <Card padding="lg" className="sticky top-24 space-y-6">
+            <Card padding="md" className="sticky top-24 space-y-4 sm:space-y-6 sm:p-6">
               <div>
-                <h2 className="font-display text-xl font-semibold text-olive-900 mb-4">
+                <h2 className="font-display text-lg sm:text-xl font-semibold text-olive-900 mb-3 sm:mb-4">
                   Ingredients
                 </h2>
 
@@ -189,8 +193,8 @@ export default function RecipeDetailPage() {
             transition={{ delay: 0.5 }}
             className="md:col-span-2"
           >
-            <Card padding="lg">
-              <h2 className="font-display text-xl font-semibold text-olive-900 mb-6">
+            <Card padding="md" className="sm:p-6">
+              <h2 className="font-display text-lg sm:text-xl font-semibold text-olive-900 mb-4 sm:mb-6">
                 Instructions
               </h2>
 
@@ -204,19 +208,19 @@ export default function RecipeDetailPage() {
                   <motion.li
                     key={instruction.step}
                     variants={staggerItem}
-                    className="flex gap-4"
+                    className="flex gap-3 sm:gap-4"
                   >
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-olive-100 flex items-center justify-center font-semibold text-olive-700">
+                    <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-olive-100 flex items-center justify-center font-semibold text-olive-700 text-sm sm:text-base">
                       {instruction.step}
                     </div>
-                    <div className="flex-1 pt-1">
-                      <p className="text-olive-800 leading-relaxed">
+                    <div className="flex-1 min-w-0 pt-0.5 sm:pt-1">
+                      <p className="text-olive-800 leading-relaxed text-sm sm:text-base break-words">
                         {instruction.text}
                       </p>
                       {instruction.tip && (
-                        <p className="mt-2 text-sm text-aegean-600 bg-aegean-50 p-2 rounded-lg flex items-start gap-1.5">
+                        <p className="mt-2 text-xs sm:text-sm text-aegean-600 bg-aegean-50 p-2 rounded-lg flex items-start gap-1.5 break-words">
                           <IconBulb size={16} className="flex-shrink-0 mt-0.5" />
-                          <span>{instruction.tip}</span>
+                          <span className="min-w-0">{instruction.tip}</span>
                         </p>
                       )}
                     </div>
@@ -231,29 +235,29 @@ export default function RecipeDetailPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
-                className="mt-6 bg-olive-50 rounded-2xl p-6"
+                className="mt-6 bg-olive-50 rounded-2xl p-4 sm:p-6"
               >
-                <h3 className="font-display font-semibold text-olive-900 mb-2 flex items-center gap-2">
-                  <IconBulb size={20} className="text-olive-600" />
+                <h3 className="font-display font-semibold text-olive-900 mb-2 flex items-center gap-2 text-base sm:text-lg">
+                  <IconBulb size={20} className="text-olive-600 flex-shrink-0" />
                   Tips
                 </h3>
-                <p className="text-olive-700">{recipe.tips}</p>
+                <p className="text-olive-700 text-sm sm:text-base break-words">{recipe.tips}</p>
               </motion.div>
             )}
 
             {/* Nutrition */}
             {recipe.nutrition && (
               <Card
-                padding="lg"
-                className="mt-6"
+                padding="md"
+                className="mt-6 sm:p-6"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.7 }}
               >
-                <h3 className="font-display font-semibold text-olive-900 mb-4">
+                <h3 className="font-display font-semibold text-olive-900 mb-3 sm:mb-4 text-base sm:text-lg">
                   Nutrition (per serving)
                 </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
                   <NutritionItem label="Calories" value={recipe.nutrition.calories} unit="kcal" />
                   <NutritionItem label="Protein" value={recipe.nutrition.protein} unit="g" />
                   <NutritionItem label="Carbs" value={recipe.nutrition.carbohydrates} unit="g" />
@@ -283,8 +287,8 @@ export default function RecipeDetailPage() {
 
 function NutritionItem({ label, value, unit }: { label: string; value: number; unit: string }) {
   return (
-    <div className="text-center p-3 bg-sand-50 rounded-xl">
-      <p className="text-2xl font-semibold text-olive-800">{value}</p>
+    <div className="text-center p-2 sm:p-3 bg-sand-50 rounded-xl">
+      <p className="text-xl sm:text-2xl font-semibold text-olive-800">{value}</p>
       <p className="text-xs text-sand-600">
         {unit} {label}
       </p>

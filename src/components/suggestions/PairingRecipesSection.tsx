@@ -31,11 +31,11 @@ export function PairingRecipesSection({
       animate={{ opacity: 1, y: 0 }}
       className="mt-6"
     >
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-display text-xl font-semibold text-olive-900">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-4 mb-4">
+        <h3 className="font-display text-lg sm:text-xl font-semibold text-olive-900">
           Pairs Well With
         </h3>
-        <span className="text-sm text-sand-500">For efficient meal prep</span>
+        <span className="text-xs sm:text-sm text-sand-500">For efficient meal prep</span>
       </div>
 
       <motion.div

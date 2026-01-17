@@ -19,10 +19,10 @@ export function ScaledIngredientItem({
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 0.05 * index }}
-      className="flex items-start gap-2 text-sm group"
+      className="flex items-start gap-2 text-xs sm:text-sm group"
     >
-      <span className="w-1.5 h-1.5 rounded-full bg-olive-400 mt-2 flex-shrink-0" />
-      <span className="text-olive-800 flex-1">
+      <span className="w-1.5 h-1.5 rounded-full bg-olive-400 mt-1.5 sm:mt-2 flex-shrink-0" />
+      <span className="text-olive-800 flex-1 min-w-0 break-words">
         {/* Quantity */}
         <motion.span
           key={displayText}
