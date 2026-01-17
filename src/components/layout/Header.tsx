@@ -11,7 +11,7 @@ import {
   IconCalendar,
   IconShoppingCart,
   IconChartBar,
-  IconLeaf,
+  IconToolsKitchen2,
 } from '@tabler/icons-react';
 
 interface NavItem {
@@ -71,10 +71,10 @@ export function Header() {
               whileHover={{ rotate: 10 }}
               className="text-olive-600"
             >
-              <IconLeaf size={28} />
+              <IconToolsKitchen2 size={28} />
             </motion.div>
-            <span className="font-display text-xl font-semibold text-olive-800">
-              MedDiet
+            <span className="font-display text-xl font-semibold text-olive-800 whitespace-nowrap">
+              Cooking Mate
             </span>
           </Link>
 
@@ -201,7 +201,7 @@ export function Header() {
                           onClick={closeMobileMenu}
                         >
                           <item.icon size={24} className={isActive ? 'text-olive-600' : 'text-sand-500'} />
-                          <span>{item.label}</span>
+                          <span className="whitespace-nowrap">{item.label}</span>
                           {isActive && (
                             <motion.div
                               layoutId="mobile-nav-indicator"

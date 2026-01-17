@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { Button, Badge, Card } from '@/components/ui';
 import { AddToMealPlanDrawer, TimerButton } from '@/components/recipes';
 import { RecipeCookingStats } from '@/components/cooking-log';
-import { ServingsSelector, ScaledIngredientsList } from '@/components/scaling';
+import { ServingsSelector, CheckableIngredientsList } from '@/components/scaling';
 import { SimilarRecipesSection, PairingRecipesSection } from '@/components/suggestions';
 import { getRecipeById } from '@/data/recipes';
 import { scaleRecipe } from '@/lib/utils/recipeScaling';
@@ -54,8 +54,12 @@ export default function RecipeDetailPage() {
         {/* Back Button */}
         <div className="absolute top-4 left-4">
           <Link href="/recipes">
-            <Button variant="ghost" size="sm" className="bg-white/90 hover:bg-white">
-              <ChevronLeftIcon className="w-4 h-4 mr-1" />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="bg-white/90 hover:bg-white"
+              leftIcon={<ChevronLeftIcon className="w-4 h-4" />}
+            >
               Back
             </Button>
           </Link>
@@ -125,8 +129,11 @@ export default function RecipeDetailPage() {
             </div>
 
             {/* Add to Plan Button */}
-            <Button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto">
-              <CalendarIcon className="w-4 h-4 mr-2" />
+            <Button
+              onClick={() => setIsModalOpen(true)}
+              className="w-full sm:w-auto"
+              leftIcon={<CalendarIcon className="w-4 h-4" />}
+            >
               Add to Plan
             </Button>
           </div>
@@ -179,8 +186,8 @@ export default function RecipeDetailPage() {
                 />
               </div>
 
-              {/* Scaled Ingredients List */}
-              <ScaledIngredientsList scalingResult={scalingResult} />
+              {/* Checkable Ingredients List */}
+              <CheckableIngredientsList recipeId={recipe.id} scalingResult={scalingResult} />
 
               {/* Cooking Stats */}
               <RecipeCookingStats recipeId={recipe.id} />

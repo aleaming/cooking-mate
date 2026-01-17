@@ -60,7 +60,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         whileTap={isDisabled ? undefined : { scale: 0.98 }}
         transition={SPRING.gentle}
         className={`
-          inline-flex items-center justify-center font-medium
+          inline-flex items-center justify-center font-medium whitespace-nowrap
           transition-colors duration-200
           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2
           disabled:opacity-50 disabled:cursor-not-allowed

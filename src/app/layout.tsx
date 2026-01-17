@@ -16,15 +16,16 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "MedDiet Planner | Mediterranean Diet Meal Planning",
+  title: "Cooking Mate | Mediterranean Recipe Planning",
   description:
-    "Plan your Mediterranean diet meals with ease. Browse recipes, schedule meals, and generate shopping lists automatically.",
+    "Your personal cooking companion. Browse Mediterranean recipes, plan meals, and organize shopping lists.",
   keywords: [
     "mediterranean diet",
     "meal planning",
     "recipes",
     "healthy eating",
     "shopping list",
+    "cooking",
   ],
 };
 

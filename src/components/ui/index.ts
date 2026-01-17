@@ -16,3 +16,5 @@ export type { InputProps } from './Input';
 export { Modal } from './Modal';
 
 export { Drawer } from './Drawer';
+
+export { Checkbox } from './Checkbox';
