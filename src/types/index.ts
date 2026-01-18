@@ -6,3 +6,4 @@ export * from './cookingLog';
 export * from './ingredientSearch';
 export * from './recipeSuggestion';
 export * from './recipeScaling';
+export * from './auth';

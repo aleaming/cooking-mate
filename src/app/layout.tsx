@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
-import { Header } from "@/components/layout";
+import { AuthProvider } from "@/providers/AuthProvider";
+import { ConditionalHeader } from "@/components/layout/ConditionalHeader";
 import "./globals.css";
 
 const inter = Inter({
@@ -37,8 +38,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
       <body className="min-h-screen bg-background text-foreground antialiased">
-        <Header />
-        <main>{children}</main>
+        <AuthProvider>
+          <ConditionalHeader />
+          <main>{children}</main>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -22,6 +22,7 @@ Mediterranean diet meal planning app built with Next.js 16 App Router. Users bro
 - **Zustand 5** for state with localStorage persistence
 - **Framer Motion 12** for animations
 - **@dnd-kit** for drag-and-drop calendar interactions
+- **@tabler/icons-react** for icons
 - **date-fns 4** for date manipulation
 - **Supabase** client configured but not yet active (data is static)
 
@@ -50,6 +51,7 @@ src/
 │   ├── recipes/          # Static recipe data (breakfast, lunch, dinner)
 │   └── masterIngredients.ts  # Master ingredient list for pantry finder
 ├── hooks/                # Custom React hooks
+├── providers/            # React context providers
 ├── lib/
 │   ├── constants/        # Animation configs, etc.
 │   ├── data/             # Data access functions
@@ -75,7 +77,9 @@ Three Zustand stores with persist middleware:
 **useCookingLogStore** (`src/stores/useCookingLogStore.ts`)
 - Tracks cooking sessions with ratings, notes, and servings made
 - Provides recipe stats (times cooked, average rating, last cooked)
-- Methods: `logCooking`, `getRecipeStats`, `getSessionsForRecipe`, `getAllSessions`, `getMonthlyStats`
+- Core methods: `logCooking`, `getRecipeStats`, `getSessionsForRecipe`, `getAllSessions`, `getMonthlyStats`
+- CRUD methods: `updateSession`, `deleteSession`, `getSession`
+- Query methods: `getSessionsInDateRange`, `wasRecentlyCooked`, `isMealLogged`, `getSessionByMealPlanKey`
 - Persists to `meddiet-cooking-log` in localStorage
 
 **Important Pattern**: When using computed data from Zustand (like `getRecipeStats`), use `useMemo` instead of calling directly in selector to prevent infinite loops:
@@ -97,8 +101,9 @@ const stats = useCookingLogStore((state) => state.getRecipeStats(id));
 ### Component Patterns
 
 **UI Components** (`src/components/ui/`)
-- Badge, Button, Card, Drawer, Input, Modal, Skeleton
+- Badge, Button, Card, Checkbox, Drawer, Input, Modal, Skeleton
 - Variant-based: Button has `variant` (primary/secondary/outline/ghost) and `size` (sm/md/lg)
+- Checkbox: Animated checkbox with Framer Motion checkmark
 - Compound pattern: Card exports CardHeader, CardTitle, CardContent, CardFooter, CardImage
 - All exported through index.ts barrel file
 
@@ -120,6 +125,15 @@ const stats = useCookingLogStore((state) => state.getRecipeStats(id));
 - `ScaledIngredientItem` - Individual ingredient with original amount tooltip
 - `ScalingWarningBanner` - Collapsible warnings for non-linear scaling
 - `TimingAdjustmentNote` - Cook time adjustment suggestions
+- `CheckableIngredientItem` - Ingredient row with checkbox for gathering tracking
+- `CheckableIngredientsList` - Full ingredient list with checkboxes, progress bar, and reset
+
+**Recipe Components** (`src/components/recipes/`)
+- `RecipeCard` - Recipe card for browsing views
+- `RecipeCatalog` - Recipe grid with filtering
+- `TimerButton` - Triggers native device timer on mobile or shows in-app modal on desktop
+- `TimerModal` - In-app timer with progress ring, Web Audio API alarm, and browser notifications
+- `AddToCalendarModal` - Modal for adding recipes to meal plan with date/meal type selection
 
 **Suggestion Components** (`src/components/suggestions/`)
 - `SimilarRecipesSection` - "You might also like" horizontal scroll
@@ -141,6 +155,7 @@ const stats = useCookingLogStore((state) => state.getRecipeStats(id));
 - `recipeScaling.ts` - Smart recipe scaling with warnings for non-linear ingredients
 - `recipeOverlap.ts` - Recipe pairing/similarity analysis, shopping efficiency calculations
 - `ingredientMatching.ts` - Pantry finder logic, recipe matching by available ingredients
+- `timer.ts` - Timer utilities: `parseTimeFromText()`, `formatDuration()`, `formatCountdown()`, mobile device detection, native timer integration
 
 **`src/lib/data/`**
 - `masterIngredients.ts` - Functions to access master ingredient list for pantry finder
@@ -148,6 +163,8 @@ const stats = useCookingLogStore((state) => state.getRecipeStats(id));
 ### Hooks
 
 - `useDeviceId` - Generates and persists a unique device identifier
+- `useTimer` - Countdown timer with start, pause, resume, reset, stop controls
+- `useCookingChecklist` - Manages ingredient checklist state with sessionStorage persistence
 
 ### Animation System
 
@@ -155,7 +172,11 @@ Centralized in `src/lib/constants/animations.ts`:
 - `SPRING` configs (gentle, bouncy, stiff, soft)
 - `pageVariants`, `cardVariants` for page/component transitions
 - `staggerContainer`/`staggerItem` for list animations
-- `drawerContent`/`modalContent` for overlays
+- `drawerContent`/`modalContent`/`drawerBackdrop` for overlays
+- `checkmarkVariants`/`strikethroughVariants` for checkbox animations
+- `fadeIn`, `fadeInUp`, `slideLeft`, `slideRight` for general transitions
+- `collapseVariants`, `tooltipVariants`, `buttonRipple` for micro-interactions
+- `draggableVariants`/`droppableVariants` for drag-and-drop feedback
 
 ### Type System
 
@@ -200,9 +221,11 @@ Main navigation in `src/components/layout/Header.tsx`:
 
 **Recipe Detail Page** (`src/app/recipes/[id]/page.tsx`)
 - Scaling controls with presets and warnings
+- Checkable ingredient list for gathering tracking
+- Cooking timer (native on mobile, in-app modal on desktop)
 - Smart suggestions (similar recipes, pairing recipes)
 - Cooking stats (times cooked, average rating)
-- Add to meal plan drawer
+- Add to meal plan modal
 
 **Calendar Page** (`src/components/calendar/`)
 - `MealSlot.tsx` - Includes "Mark as Cooked" button on filled slots

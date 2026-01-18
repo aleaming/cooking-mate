@@ -12,7 +12,12 @@ import {
   IconShoppingCart,
   IconChartBar,
   IconToolsKitchen2,
+  IconUser,
+  IconLogout,
+  IconLogin,
 } from '@tabler/icons-react';
+import { useAuth } from '@/providers/AuthProvider';
+import { logout } from '@/lib/auth/actions';
 
 interface NavItem {
   href: string;
@@ -32,22 +37,41 @@ const navItems: NavItem[] = [
 export function Header() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const { user, isLoading } = useAuth();
 
   // Close mobile menu handler
   const closeMobileMenu = useCallback(() => {
     setIsMobileMenuOpen(false);
   }, []);
 
-  // Close mobile menu on escape key
+  // Close user menu handler
+  const closeUserMenu = useCallback(() => {
+    setIsUserMenuOpen(false);
+  }, []);
+
+  // Close menus on escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         closeMobileMenu();
+        closeUserMenu();
       }
     };
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, [closeMobileMenu]);
+  }, [closeMobileMenu, closeUserMenu]);
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (isUserMenuOpen) {
+        closeUserMenu();
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [isUserMenuOpen, closeUserMenu]);
 
   // Prevent body scroll when menu is open
   useEffect(() => {
@@ -107,6 +131,62 @@ export function Header() {
                 </Link>
               );
             })}
+
+            {/* User Menu / Sign In */}
+            <div className="ml-2 pl-2 border-l border-sand-200">
+              {isLoading ? (
+                <div className="w-10 h-10 rounded-full bg-sand-100 animate-pulse" />
+              ) : user ? (
+                <div className="relative">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsUserMenuOpen(!isUserMenuOpen);
+                    }}
+                    className="flex items-center justify-center w-10 h-10 rounded-full bg-olive-100 text-olive-600 hover:bg-olive-200 transition-colors"
+                    aria-label="User menu"
+                    aria-expanded={isUserMenuOpen}
+                  >
+                    <IconUser size={20} />
+                  </button>
+                  <AnimatePresence>
+                    {isUserMenuOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: -5 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: -5 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute right-0 top-12 w-56 bg-white rounded-xl shadow-lg border border-sand-200 py-2 z-50"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="px-4 py-2 border-b border-sand-100">
+                          <p className="text-sm font-medium text-olive-800 truncate">
+                            {user.email}
+                          </p>
+                        </div>
+                        <form action={logout}>
+                          <button
+                            type="submit"
+                            className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-sand-700 hover:bg-sand-50 transition-colors"
+                          >
+                            <IconLogout size={18} />
+                            Sign out
+                          </button>
+                        </form>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ) : (
+                <Link
+                  href="/login"
+                  className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-olive-700 hover:bg-olive-100 rounded-lg transition-colors min-h-[44px]"
+                >
+                  <IconLogin size={18} />
+                  Sign in
+                </Link>
+              )}
+            </div>
           </nav>
 
           {/* Mobile Menu Button - 44x44px minimum touch target */}
@@ -212,6 +292,48 @@ export function Header() {
                       </motion.div>
                     );
                   })}
+
+                  {/* Divider */}
+                  <div className="my-2 border-t border-sand-200" />
+
+                  {/* User Section in Mobile Menu */}
+                  {!isLoading && (
+                    <motion.div
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: navItems.length * 0.05 }}
+                    >
+                      {user ? (
+                        <>
+                          <div className="px-4 py-2 mb-1">
+                            <p className="text-sm text-sand-500">Signed in as</p>
+                            <p className="text-sm font-medium text-olive-800 truncate">
+                              {user.email}
+                            </p>
+                          </div>
+                          <form action={logout}>
+                            <button
+                              type="submit"
+                              onClick={closeMobileMenu}
+                              className="flex items-center gap-3 px-4 py-3 rounded-xl min-h-[48px] text-base font-medium text-sand-700 hover:bg-sand-100 active:bg-sand-200 transition-colors w-full"
+                            >
+                              <IconLogout size={24} className="text-sand-500" />
+                              <span>Sign out</span>
+                            </button>
+                          </form>
+                        </>
+                      ) : (
+                        <Link
+                          href="/login"
+                          className="flex items-center gap-3 px-4 py-3 rounded-xl min-h-[48px] text-base font-medium text-olive-700 bg-olive-50 hover:bg-olive-100 transition-colors"
+                          onClick={closeMobileMenu}
+                        >
+                          <IconLogin size={24} className="text-olive-600" />
+                          <span>Sign in</span>
+                        </Link>
+                      )}
+                    </motion.div>
+                  )}
                 </div>
               </div>
             </motion.nav>
