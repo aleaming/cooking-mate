@@ -24,13 +24,22 @@ import {
   type UserPreferences,
 } from '@/lib/actions/profile';
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, Modal, Toggle, Skeleton } from '@/components/ui';
+import { SubscriptionStatus } from '@/components/subscription';
 import { pageVariants, staggerContainer, staggerItem } from '@/lib/constants/animations';
+import type { SubscriptionInfo } from '@/types/subscription';
 
 export default function SettingsPage() {
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
   const { theme: currentTheme, setTheme } = useTheme();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [subscription, setSubscription] = useState<SubscriptionInfo>({
+    status: 'inactive',
+    tier: null,
+    period: null,
+    currentPeriodEnd: null,
+    cancelAtPeriodEnd: false,
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -80,6 +89,15 @@ export default function SettingsPage() {
         ...prev,
         ...data.preferences,
       }));
+      // Set subscription info from profile (fields may not exist yet)
+      const profileAny = data as unknown as Record<string, unknown>;
+      setSubscription({
+        status: (profileAny.subscription_status as SubscriptionInfo['status']) || 'inactive',
+        tier: (profileAny.subscription_tier as SubscriptionInfo['tier']) || null,
+        period: (profileAny.subscription_period as SubscriptionInfo['period']) || null,
+        currentPeriodEnd: (profileAny.subscription_current_period_end as string) || null,
+        cancelAtPeriodEnd: (profileAny.subscription_cancel_at_period_end as boolean) || false,
+      });
     }
     setIsLoading(false);
   }
@@ -433,7 +451,12 @@ export default function SettingsPage() {
             </motion.div>
           </div>
 
-          {/* Row 3: Danger Zone (full width) */}
+          {/* Row 3: Subscription (full width) */}
+          <motion.div variants={staggerItem}>
+            <SubscriptionStatus subscription={subscription} />
+          </motion.div>
+
+          {/* Row 4: Danger Zone (full width) */}
           <motion.div variants={staggerItem}>
             <Card className="border-2 border-error/30">
               <CardHeader className="p-6 pb-0">
