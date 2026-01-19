@@ -131,6 +131,9 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
   const currentPeriodEnd = subscriptionAny.current_period_end as number | undefined;
   const cancelAtPeriodEnd = subscriptionAny.cancel_at_period_end as boolean | undefined;
 
+  // When subscription becomes active, clear trial fields
+  const isActive = subscription.status === 'active';
+
   const { error } = await getSupabaseAdmin()
     .from('profiles')
     .update({
@@ -142,6 +145,9 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
         ? new Date(currentPeriodEnd * 1000).toISOString()
         : null,
       subscription_cancel_at_period_end: cancelAtPeriodEnd ?? false,
+      // Clear trial fields when subscription is active
+      trial_started_at: isActive ? null : undefined,
+      trial_ends_at: isActive ? null : undefined,
     })
     .eq('id', userId);
 

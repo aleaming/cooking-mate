@@ -15,6 +15,10 @@ export interface SubscriptionInfo {
   period: SubscriptionPeriod | null;
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
+  trialStartedAt: string | null;
+  trialEndsAt: string | null;
+  trialDaysRemaining: number | null;
+  isInTrial: boolean;
 }
 
 export interface PlanFeature {
@@ -45,10 +49,48 @@ export interface ProfileWithSubscription {
   subscription_id: string | null;
   subscription_current_period_end: string | null;
   subscription_cancel_at_period_end: boolean;
+  trial_started_at: string | null;
+  trial_ends_at: string | null;
   created_at: string;
   updated_at: string;
 }
 
 export function hasActiveSubscription(status: SubscriptionStatus | null | undefined): boolean {
   return status === 'active' || status === 'trialing';
+}
+
+/**
+ * Calculate days remaining in trial
+ */
+export function getTrialDaysRemaining(trialEndsAt: string | null): number {
+  if (!trialEndsAt) return 0;
+  const days = Math.ceil(
+    (new Date(trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+  );
+  return Math.max(0, days);
+}
+
+/**
+ * Check if user is currently in an active trial
+ */
+export function isInActiveTrial(
+  status: SubscriptionStatus | null,
+  trialEndsAt: string | null
+): boolean {
+  return (
+    status === 'trialing' &&
+    !!trialEndsAt &&
+    new Date(trialEndsAt) > new Date()
+  );
+}
+
+/**
+ * Check if user has any form of active access (subscription or trial)
+ */
+export function hasActiveAccess(
+  status: SubscriptionStatus | null,
+  trialEndsAt: string | null
+): boolean {
+  if (status === 'active') return true;
+  return isInActiveTrial(status, trialEndsAt);
 }

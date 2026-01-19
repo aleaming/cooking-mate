@@ -80,7 +80,8 @@ export async function signup(formData: FormData) {
   }
 
   revalidatePath('/', 'layout');
-  redirect('/calendar');
+  // Redirect new users to pricing page to start their trial or subscribe
+  redirect('/pricing');
 }
 
 export async function forgotPassword(formData: FormData) {
