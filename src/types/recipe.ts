@@ -34,7 +34,7 @@ export interface Ingredient {
 
 export interface RecipeIngredient {
   id: string;
-  ingredientId: string;
+  ingredientId: string | null; // null for user-imported ingredients without master link
   name: string;
   category: IngredientCategory;
   quantity: number | null; // null for "to taste"
@@ -97,3 +97,88 @@ export interface Recipe {
 
 // For seeding/creating recipes without id and timestamps
 export interface RecipeSeedData extends Omit<Recipe, 'id' | 'totalTimeMinutes' | 'createdAt' | 'updatedAt'> {}
+
+// Recipe Photo types for user-uploaded images
+export interface RecipePhoto {
+  id: string;
+  url: string;
+  thumbnailUrl?: string;
+  standardUrl?: string;
+  isPrimary: boolean;
+  sortOrder: number;
+  createdAt?: string;
+}
+
+// Source types for imported recipes
+export type RecipeSourceType = 'manual' | 'markdown' | 'url_import';
+
+// User-created recipe with ownership and source tracking
+export interface UserRecipe extends Recipe {
+  ownerId: string;
+  sourceUrl?: string;
+  sourceType: RecipeSourceType;
+  photos: RecipePhoto[];
+  isSystem: false;
+  isPublic: boolean;
+}
+
+// Parsed ingredient from markdown or URL scraping
+export interface ParsedIngredient {
+  text: string; // Full original text (e.g., "2 cups flour, sifted")
+  quantity?: number;
+  unit?: string;
+  name?: string;
+  preparation?: string;
+  notes?: string;
+}
+
+// Parsed instruction from markdown or URL scraping
+export interface ParsedInstruction {
+  step: number;
+  text: string;
+  duration?: number;
+  tip?: string;
+}
+
+// Data structure for imported recipes (before conversion to full Recipe)
+export interface ImportedRecipeData {
+  title: string;
+  description?: string;
+  ingredients: ParsedIngredient[];
+  instructions: ParsedInstruction[];
+  prepTime?: number;
+  cookTime?: number;
+  servings?: number;
+  sourceUrl?: string;
+  imageUrl?: string;
+  cuisine?: string;
+  dietaryTags?: DietaryTag[];
+  difficulty?: Difficulty;
+  mealType?: MealType;
+}
+
+// Input for creating a user recipe
+export interface CreateRecipeInput {
+  name: string;
+  slug?: string;
+  description: string;
+  ingredients: RecipeIngredient[];
+  instructions: Instruction[];
+  prepTimeMinutes: number;
+  cookTimeMinutes: number;
+  servings: number;
+  mealType: MealType;
+  cuisine?: string;
+  dietaryTags?: DietaryTag[];
+  difficulty?: Difficulty;
+  tips?: string;
+  nutrition?: NutritionInfo;
+  sourceUrl?: string;
+  sourceType?: RecipeSourceType;
+  imageUrl?: string;
+}
+
+// Input for updating a user recipe
+export interface UpdateRecipeInput extends Partial<CreateRecipeInput> {
+  id: string;
+}

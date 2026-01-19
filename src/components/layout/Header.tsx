@@ -11,12 +11,14 @@ import {
   IconCalendar,
   IconShoppingCart,
   IconChartBar,
-  IconToolsKitchen2,
   IconUser,
   IconSettings,
   IconLogout,
   IconLogin,
+  IconChefHat,
+  IconPlus,
 } from '@tabler/icons-react';
+import { Logo } from '@/components/ui';
 import { useAuth } from '@/providers/AuthProvider';
 import { logout } from '@/lib/auth/actions';
 
@@ -91,12 +93,12 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 min-h-[44px] min-w-[44px]">
+          <Link href="/" className="flex items-center gap-2 min-h-[44px] min-w-[44px] group">
             <motion.div
               whileHover={{ rotate: 10 }}
-              className="text-olive-600"
+              transition={{ duration: 0.2 }}
             >
-              <IconToolsKitchen2 size={28} />
+              <Logo size={28} />
             </motion.div>
             <span className="font-display text-xl font-semibold text-foreground whitespace-nowrap">
               Cooking Mate
@@ -165,6 +167,23 @@ export function Header() {
                             {user.email}
                           </p>
                         </div>
+                        <Link
+                          href="/recipes/my-recipes"
+                          onClick={closeUserMenu}
+                          className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-foreground/80 hover:bg-foreground/5 transition-colors"
+                        >
+                          <IconChefHat size={18} />
+                          My Recipes
+                        </Link>
+                        <Link
+                          href="/recipes/import"
+                          onClick={closeUserMenu}
+                          className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-foreground/80 hover:bg-foreground/5 transition-colors"
+                        >
+                          <IconPlus size={18} />
+                          Import Recipe
+                        </Link>
+                        <div className="border-t border-foreground/10 my-1" />
                         <Link
                           href="/profile"
                           onClick={closeUserMenu}
@@ -329,6 +348,23 @@ export function Header() {
                               {user.email}
                             </p>
                           </div>
+                          <Link
+                            href="/recipes/my-recipes"
+                            className="flex items-center gap-3 px-4 py-3 rounded-xl min-h-[48px] text-base font-medium text-foreground/80 hover:bg-foreground/5 active:bg-foreground/10 transition-colors w-full"
+                            onClick={closeMobileMenu}
+                          >
+                            <IconChefHat size={24} className="text-foreground/50" />
+                            <span>My Recipes</span>
+                          </Link>
+                          <Link
+                            href="/recipes/import"
+                            className="flex items-center gap-3 px-4 py-3 rounded-xl min-h-[48px] text-base font-medium text-foreground/80 hover:bg-foreground/5 active:bg-foreground/10 transition-colors w-full"
+                            onClick={closeMobileMenu}
+                          >
+                            <IconPlus size={24} className="text-foreground/50" />
+                            <span>Import Recipe</span>
+                          </Link>
+                          <div className="my-2 border-t border-foreground/10" />
                           <Link
                             href="/profile"
                             className="flex items-center gap-3 px-4 py-3 rounded-xl min-h-[48px] text-base font-medium text-foreground/80 hover:bg-foreground/5 active:bg-foreground/10 transition-colors w-full"

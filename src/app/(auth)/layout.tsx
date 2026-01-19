@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { IconToolsKitchen2 } from '@tabler/icons-react';
+import { Logo } from '@/components/ui';
 import { pageVariants } from '@/lib/constants/animations';
 
 export default function AuthLayout({
@@ -16,13 +16,13 @@ export default function AuthLayout({
       <header className="py-6 px-4">
         <Link
           href="/"
-          className="flex items-center justify-center gap-2 min-h-[44px]"
+          className="flex items-center justify-center gap-2 min-h-[44px] group"
         >
           <motion.div
             whileHover={{ rotate: 10 }}
-            className="text-olive-600"
+            transition={{ duration: 0.2 }}
           >
-            <IconToolsKitchen2 size={32} />
+            <Logo size={32} />
           </motion.div>
           <span className="font-display text-2xl font-semibold text-olive-800">
             Cooking Mate

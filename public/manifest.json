@@ -1,0 +1,60 @@
+{
+  "name": "Cooking Mate",
+  "short_name": "Cooking Mate",
+  "description": "Mediterranean meal planning made simple. Plan meals, discover recipes, and generate shopping lists.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8f5f0",
+  "theme_color": "#6f7b4d",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["food", "lifestyle", "health"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Browse Recipes",
+      "short_name": "Recipes",
+      "description": "Browse Mediterranean recipes",
+      "url": "/recipes",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Meal Plan",
+      "short_name": "Plan",
+      "description": "View your meal plan",
+      "url": "/calendar",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Shopping List",
+      "short_name": "Shopping",
+      "description": "View your shopping list",
+      "url": "/shopping-list",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

@@ -6,15 +6,22 @@ import { motion } from 'framer-motion';
 import { Recipe } from '@/types';
 import { Badge } from '@/components/ui';
 import { cardVariants, SPRING } from '@/lib/constants/animations';
+import { IconEdit, IconTrash } from '@tabler/icons-react';
 
 interface RecipeCardProps {
   recipe: Recipe;
   compact?: boolean;
   onClick?: () => void;
+  showActions?: boolean;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  sourceLabel?: string;
+  linkQuery?: string;
 }
 
 const RecipeCard = forwardRef<HTMLDivElement, RecipeCardProps>(
-  ({ recipe, compact = false, onClick }, ref) => {
+  ({ recipe, compact = false, onClick, showActions = false, onEdit, onDelete, sourceLabel, linkQuery }, ref) => {
+    const recipeUrl = linkQuery ? `/recipes/${recipe.id}?${linkQuery}` : `/recipes/${recipe.id}`;
     const content = (
       <motion.div
         ref={ref}
@@ -58,12 +65,53 @@ const RecipeCard = forwardRef<HTMLDivElement, RecipeCardProps>(
             </span>
           </div>
 
+          {/* Source Label (for user recipes) */}
+          {sourceLabel && (
+            <div className="absolute top-2 left-2">
+              <span className="px-2 py-1 text-xs font-medium bg-olive-500 text-white rounded-lg">
+                {sourceLabel}
+              </span>
+            </div>
+          )}
+
           {/* Featured Badge */}
-          {recipe.isFeatured && (
+          {recipe.isFeatured && !sourceLabel && (
             <div className="absolute top-2 right-2">
               <span className="px-2 py-1 text-xs font-medium bg-terracotta-500 text-white rounded-lg">
                 Featured
               </span>
+            </div>
+          )}
+
+          {/* Action buttons for user recipes */}
+          {showActions && (onEdit || onDelete) && (
+            <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              {onEdit && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onEdit();
+                  }}
+                  className="p-2 bg-white rounded-lg shadow hover:bg-sand-50 transition-colors"
+                  aria-label="Edit recipe"
+                >
+                  <IconEdit className="w-4 h-4 text-foreground" />
+                </button>
+              )}
+              {onDelete && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onDelete();
+                  }}
+                  className="p-2 bg-white rounded-lg shadow hover:bg-red-50 transition-colors"
+                  aria-label="Delete recipe"
+                >
+                  <IconTrash className="w-4 h-4 text-red-600" />
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -137,7 +185,7 @@ const RecipeCard = forwardRef<HTMLDivElement, RecipeCardProps>(
     // If no onClick handler, wrap in Link
     if (!onClick) {
       return (
-        <Link href={`/recipes/${recipe.id}`} className="block h-full">
+        <Link href={recipeUrl} className="block h-full">
           {content}
         </Link>
       );
