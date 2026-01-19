@@ -96,7 +96,7 @@ export function findMatchingRecipes(
   const matches: RecipeMatch[] = [];
 
   for (const recipe of allRecipes) {
-    const recipeIngredientIds = recipe.ingredients.map((i) => i.ingredientId);
+    const recipeIngredientIds = recipe.ingredients.map((i) => i.ingredientId).filter((id): id is string => id !== null);
     const matchedIds = recipeIngredientIds.filter((id) => ingredientSet.has(id));
     const missingIds = recipeIngredientIds.filter((id) => !ingredientSet.has(id));
     const percentage =
@@ -270,12 +270,11 @@ export function canMakeRecipe(
     return { canMake: false, matchPercentage: 0, missing: [] };
   }
 
-  const recipeIngredientIds = recipe.ingredients.map((i) => i.ingredientId);
+  const recipeIngredientIds = recipe.ingredients.map((i) => i.ingredientId).filter((id): id is string => id !== null);
   const missing = recipeIngredientIds.filter((id) => !ingredientSet.has(id));
-  const matchPercentage = Math.round(
-    ((recipeIngredientIds.length - missing.length) / recipeIngredientIds.length) *
-      100
-  );
+  const matchPercentage = recipeIngredientIds.length > 0
+    ? Math.round(((recipeIngredientIds.length - missing.length) / recipeIngredientIds.length) * 100)
+    : 0;
 
   return {
     canMake: missing.length === 0,

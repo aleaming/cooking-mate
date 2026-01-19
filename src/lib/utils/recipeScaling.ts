@@ -194,6 +194,9 @@ function checkScalingWarning(
 ): ScalingWarning | null {
   const id = ingredient.ingredientId;
 
+  // Skip ingredients without an ingredientId
+  if (!id) return null;
+
   // Check for non-linear ingredients
   if (NON_LINEAR_INGREDIENTS.has(id)) {
     if (scaleFactor > 2) {

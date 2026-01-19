@@ -1,6 +1,6 @@
 'use client';
 
-import { forwardRef, type InputHTMLAttributes, useState } from 'react';
+import { forwardRef, type InputHTMLAttributes, useState, useId } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fadeInUp } from '@/lib/constants/animations';
 
@@ -29,7 +29,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     ref
   ) => {
     const [isFocused, setIsFocused] = useState(false);
-    const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
+    const generatedId = useId();
+    const inputId = id || generatedId;
 
     return (
       <div className="w-full">

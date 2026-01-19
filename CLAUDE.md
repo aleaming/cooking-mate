@@ -24,7 +24,7 @@ Mediterranean diet meal planning app built with Next.js 16 App Router. Users bro
 - **@dnd-kit** for drag-and-drop calendar interactions
 - **@tabler/icons-react** for icons
 - **date-fns 4** for date manipulation
-- **Supabase** client configured but not yet active (data is static)
+- **Supabase** for user authentication and user-created recipes storage
 
 ### Project Structure
 
@@ -35,11 +35,17 @@ src/
 │   ├── cooking-history/  # Cooking history timeline with stats
 │   ├── pantry-finder/    # Ingredient-based recipe finder
 │   ├── recipes/          # Recipe browsing
-│   │   └── [id]/         # Dynamic recipe detail page (with scaling, suggestions)
+│   │   ├── [id]/         # Dynamic recipe detail page (with scaling, suggestions)
+│   │   │   └── edit/     # Recipe edit page (user recipes only)
+│   │   ├── import/       # Recipe import flows
+│   │   │   ├── url/      # Import from URL (scrapes recipe data)
+│   │   │   └── markdown/ # Import from markdown files
+│   │   └── my-recipes/   # User's imported recipe collection
 │   └── shopping-list/    # Shopping list view
 ├── components/
 │   ├── calendar/         # Calendar-specific components
 │   ├── cooking-log/      # Meal tracking components (rating, logging)
+│   ├── import/           # Recipe import components (RecipePreviewCard)
 │   ├── layout/           # Layout components (header, nav)
 │   ├── pantry/           # Pantry finder components
 │   ├── recipes/          # Recipe-specific components
@@ -53,6 +59,7 @@ src/
 ├── hooks/                # Custom React hooks
 ├── providers/            # React context providers
 ├── lib/
+│   ├── actions/          # Server actions (userRecipes, scrapeRecipe, storage)
 │   ├── constants/        # Animation configs, etc.
 │   ├── data/             # Data access functions
 │   ├── supabase/         # Supabase client setup
@@ -94,9 +101,34 @@ const stats = useCookingLogStore((state) => state.getRecipeStats(id));
 
 ### Data Flow
 
-1. **Recipes** are static TypeScript objects in `src/data/recipes/` (breakfast.ts, lunch.ts, dinner.ts, exported via index.ts)
-2. **Meal Plans** are created when users drop recipes onto calendar slots
-3. **Shopping Lists** aggregate ingredients from all recipes in the selected date range using `src/lib/utils/ingredients.ts`
+1. **Static Recipes** are TypeScript objects in `src/data/recipes/` (breakfast.ts, lunch.ts, dinner.ts, exported via index.ts)
+2. **User Recipes** are stored in Supabase (`recipes` table) with `owner_id` linking to authenticated user
+3. **Recipe Collection** (`/recipes`) combines both static and user recipes for unified browsing/filtering
+4. **Meal Plans** are created when users drop recipes onto calendar slots
+5. **Shopping Lists** aggregate ingredients from all recipes in the selected date range using `src/lib/utils/ingredients.ts`
+
+### User Recipe System
+
+**Import Methods:**
+- **URL Import** (`/recipes/import/url`) - Scrapes recipe data from external URLs using Anthropic API
+- **Markdown Import** (`/recipes/import/markdown`) - Parses `.md` files containing recipe data
+
+**Recipe IDs:**
+- Static recipes use slug-based IDs (e.g., `greek-salad`)
+- User recipes use prefixed IDs: `user-{shortId}-{hash}` (e.g., `user-mkkkxbhs-vk8muc`)
+- Check `recipeId.startsWith('user-')` to determine if recipe needs Supabase fetch
+
+**Server Actions** (`src/lib/actions/userRecipes.ts`):
+- `getUserRecipes()` - Fetch all recipes for authenticated user
+- `getUserRecipeById(id)` - Fetch single user recipe
+- `createUserRecipe(data)` - Create new recipe with ingredients/instructions
+- `updateUserRecipe(data)` - Update existing user recipe
+- `deleteUserRecipe(id)` - Delete user recipe
+
+**Database Schema:**
+- `recipes` table - Core recipe data with `owner_id` foreign key
+- `recipe_ingredients` table - Ingredients with optional `ingredient_id` (null for user imports)
+- `recipe_photos` table - User-uploaded recipe images
 
 ### Component Patterns
 
@@ -130,10 +162,16 @@ const stats = useCookingLogStore((state) => state.getRecipeStats(id));
 
 **Recipe Components** (`src/components/recipes/`)
 - `RecipeCard` - Recipe card for browsing views
-- `RecipeCatalog` - Recipe grid with filtering
+  - Props: `recipe`, `compact?`, `onClick?`, `showActions?`, `onEdit?`, `onDelete?`, `sourceLabel?`, `linkQuery?`
+  - `showActions` shows edit/delete buttons on hover (for user recipes)
+  - `linkQuery` adds query params to recipe link (e.g., `"from=my-recipes"`)
+- `RecipeCatalog` - Recipe grid with filtering (meal type, difficulty, dietary tags, search)
 - `TimerButton` - Triggers native device timer on mobile or shows in-app modal on desktop
 - `TimerModal` - In-app timer with progress ring, Web Audio API alarm, and browser notifications
 - `AddToCalendarModal` - Modal for adding recipes to meal plan with date/meal type selection
+
+**Import Components** (`src/components/import/`)
+- `RecipePreviewCard` - Editable recipe card for import/edit flows with inline editing for all fields
 
 **Suggestion Components** (`src/components/suggestions/`)
 - `SimilarRecipesSection` - "You might also like" horizontal scroll
@@ -156,6 +194,8 @@ const stats = useCookingLogStore((state) => state.getRecipeStats(id));
 - `recipeOverlap.ts` - Recipe pairing/similarity analysis, shopping efficiency calculations
 - `ingredientMatching.ts` - Pantry finder logic, recipe matching by available ingredients
 - `timer.ts` - Timer utilities: `parseTimeFromText()`, `formatDuration()`, `formatCountdown()`, mobile device detection, native timer integration
+- `ingredientCategory.ts` - Infers ingredient category from name using keyword matching
+- `markdownParser.ts` - Parses markdown files to extract recipe data
 
 **`src/lib/data/`**
 - `masterIngredients.ts` - Functions to access master ingredient list for pantry finder
@@ -182,6 +222,10 @@ Centralized in `src/lib/constants/animations.ts`:
 
 Core types in `src/types/`:
 - `Recipe`, `RecipeIngredient`, `Instruction`, `NutritionInfo`
+- `UserRecipe` - Extends Recipe with `ownerId`, `sourceUrl`, `sourceType`, `photos`
+- `RecipeSourceType`: 'manual' | 'markdown' | 'url_import'
+- `ImportedRecipeData`, `ParsedIngredient`, `ParsedInstruction` for import flows
+- `CreateRecipeInput`, `UpdateRecipeInput` for server actions
 - `MealSlotType`: 'breakfast' | 'lunch' | 'dinner'
 - `MealPlan`, `DayMealPlan` for calendar data
 - `AggregatedIngredient`, `ShoppingListByCategory` for shopping
@@ -189,6 +233,8 @@ Core types in `src/types/`:
 - `MasterIngredient`, `IngredientCategory` for pantry finder
 - `RecipeMatch`, `RecipePairing`, `RecipeSimilarity` for suggestions
 - `ScalingResult`, `ScalingWarning` for recipe scaling
+
+**Note:** `RecipeIngredient.ingredientId` can be `null` for user-imported ingredients that don't link to master ingredient list.
 
 ### Styling
 
@@ -211,11 +257,23 @@ Fonts: Playfair Display (headings), Inter (body) via next/font/google.
 
 Main navigation in `src/components/layout/Header.tsx`:
 1. **Home** (`/`) - Landing page
-2. **Recipes** (`/recipes`) - Recipe browsing with filters
+2. **Recipes** (`/recipes`) - Recipe browsing with filters (includes user recipes)
 3. **Pantry Finder** (`/pantry-finder`) - Find recipes by ingredients you have
 4. **Meal Plan** (`/calendar`) - Calendar drag-and-drop meal planning
 5. **Shopping List** (`/shopping-list`) - Aggregated shopping list
 6. **History** (`/cooking-history`) - Cooking history with stats
+
+Additional routes:
+- `/recipes/my-recipes` - User's imported recipe collection with edit/delete
+- `/recipes/import` - Recipe import hub
+- `/recipes/import/url` - Import from URL
+- `/recipes/import/markdown` - Import from markdown files
+- `/recipes/[id]/edit` - Edit user recipe
+
+**Context-Aware Navigation:**
+Recipe detail pages use `?from=my-recipes` query param to determine back button behavior:
+- From Recipe Collection → back to `/recipes`
+- From My Recipes → back to `/recipes/my-recipes`
 
 ### Feature Integration Points
 
@@ -235,3 +293,15 @@ Main navigation in `src/components/layout/Header.tsx`:
 - Ingredient search with autocomplete
 - Recipe matching with percentage scores
 - "What to buy next" suggestions sidebar
+
+**My Recipes Page** (`src/app/recipes/my-recipes/page.tsx`)
+- Grid of user's imported recipes using RecipeCard
+- Filter by source type (URL Import, Markdown, Manual)
+- Search by name/description
+- Edit and delete actions on cards
+
+**Recipe Import Flow** (`src/app/recipes/import/`)
+- URL import uses Anthropic API to scrape and structure recipe data
+- Markdown import parses `.md` files with recipe structure
+- Both use `RecipePreviewCard` for inline editing before save
+- Ingredients auto-categorized using `inferIngredientCategory()`

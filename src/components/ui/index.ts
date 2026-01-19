@@ -21,3 +21,12 @@ export { Checkbox } from './Checkbox';
 
 export { Toggle } from './Toggle';
 export type { ToggleProps, ToggleSize } from './Toggle';
+
+export { FileInput } from './FileInput';
+export type { FileInputProps } from './FileInput';
+
+export { ImageEditor } from './ImageEditor';
+export type { ImageEditorProps } from './ImageEditor';
+
+export { Logo } from './Logo';
+export type { LogoProps } from './Logo';

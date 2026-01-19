@@ -44,6 +44,26 @@ export const metadata: Metadata = {
     "shopping list",
     "cooking",
   ],
+  manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/favicon.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/apple-icon.png",
+  },
+  themeColor: "#6f7b4d",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Cooking Mate",
+  },
+  openGraph: {
+    title: "Cooking Mate | Mediterranean Recipe Planning",
+    description: "Your personal cooking companion. Browse Mediterranean recipes, plan meals, and organize shopping lists.",
+    siteName: "Cooking Mate",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

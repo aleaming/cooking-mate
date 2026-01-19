@@ -15,7 +15,7 @@ export interface ShoppingList {
 export interface ShoppingListItem {
   id: string;
   shoppingListId: string;
-  ingredientId: string;
+  ingredientId: string | null;
   ingredientName: string;
   category: IngredientCategory;
   totalQuantity: number | null;
@@ -27,7 +27,7 @@ export interface ShoppingListItem {
 }
 
 export interface AggregatedIngredient {
-  ingredientId: string;
+  ingredientId: string | null;
   name: string;
   category: IngredientCategory;
   totalQuantity: number | null;

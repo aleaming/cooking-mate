@@ -1,36 +1,98 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { useParams, notFound } from 'next/navigation';
+import { useState, useMemo, useEffect } from 'react';
+import { useParams, useSearchParams, notFound } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Button, Badge, Card } from '@/components/ui';
+import { Button, Badge, Card, Skeleton } from '@/components/ui';
 import { AddToMealPlanDrawer, TimerButton } from '@/components/recipes';
 import { RecipeCookingStats } from '@/components/cooking-log';
 import { ServingsSelector, CheckableIngredientsList } from '@/components/scaling';
 import { SimilarRecipesSection, PairingRecipesSection } from '@/components/suggestions';
 import { getRecipeById } from '@/data/recipes';
+import { getUserRecipeById } from '@/lib/actions/userRecipes';
 import { scaleRecipe } from '@/lib/utils/recipeScaling';
 import { parseTimeFromText } from '@/lib/utils/timer';
 import { pageVariants, staggerContainer, staggerItem } from '@/lib/constants/animations';
 import { IconBulb } from '@tabler/icons-react';
+import type { Recipe } from '@/types';
 
 export default function RecipeDetailPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const recipeId = params.id as string;
-  const recipe = getRecipeById(recipeId);
+
+  // Determine where to go back to
+  const fromSource = searchParams.get('from');
+  const backUrl = fromSource === 'my-recipes' ? '/recipes/my-recipes' : '/recipes';
+  const backLabel = fromSource === 'my-recipes' ? 'My Recipes' : 'Recipes';
+
+  // Check if this is a user-created recipe
+  const isUserRecipe = recipeId.startsWith('user-');
+
+  // For static recipes, get immediately
+  const staticRecipe = !isUserRecipe ? getRecipeById(recipeId) : null;
+
+  const [userRecipe, setUserRecipe] = useState<Recipe | null>(null);
+  const [loading, setLoading] = useState(isUserRecipe);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch user recipe from Supabase if needed
+  useEffect(() => {
+    if (!isUserRecipe) return;
+
+    async function fetchUserRecipe() {
+      setLoading(true);
+      const result = await getUserRecipeById(recipeId);
+      if (result.error || !result.data) {
+        setError(result.error || 'Recipe not found');
+      } else {
+        setUserRecipe(result.data as Recipe);
+      }
+      setLoading(false);
+    }
+
+    fetchUserRecipe();
+  }, [recipeId, isUserRecipe]);
+
+  const recipe = staticRecipe || userRecipe;
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [targetServings, setTargetServings] = useState(recipe?.servings ?? 4);
+  const [targetServings, setTargetServings] = useState(4);
 
-  if (!recipe) {
-    notFound();
+  // Update target servings when recipe loads
+  useEffect(() => {
+    if (recipe?.servings) {
+      setTargetServings(recipe.servings);
+    }
+  }, [recipe?.servings]);
+
+  // Calculate scaling result - must be called before any returns (rules of hooks)
+  const scalingResult = useMemo(
+    () => recipe ? scaleRecipe(recipe.ingredients, recipe.servings, targetServings) : null,
+    [recipe, targetServings]
+  );
+
+  // Show loading state for user recipes
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-sand-50 p-8">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <Skeleton className="h-64 w-full rounded-2xl" />
+          <Skeleton className="h-8 w-1/2" />
+          <Skeleton className="h-4 w-3/4" />
+          <div className="grid md:grid-cols-3 gap-8">
+            <Skeleton className="h-96" />
+            <Skeleton className="h-96 md:col-span-2" />
+          </div>
+        </div>
+      </div>
+    );
   }
 
-  const scalingResult = useMemo(
-    () => scaleRecipe(recipe.ingredients, recipe.servings, targetServings),
-    [recipe.ingredients, recipe.servings, targetServings]
-  );
+  if (error || !recipe || !scalingResult) {
+    notFound();
+  }
 
   return (
     <motion.div
@@ -53,14 +115,14 @@ export default function RecipeDetailPage() {
 
         {/* Back Button */}
         <div className="absolute top-4 left-4">
-          <Link href="/recipes">
+          <Link href={backUrl}>
             <Button
               variant="ghost"
               size="sm"
               className="bg-white/90 hover:bg-white"
               leftIcon={<ChevronLeftIcon className="w-4 h-4" />}
             >
-              Back
+              {backLabel}
             </Button>
           </Link>
         </div>

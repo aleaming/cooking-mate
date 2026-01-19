@@ -141,7 +141,7 @@ export function getPairingSuggestions(
   const existingIngredients = new Set<string>();
   for (const meal of existingMeals) {
     for (const ing of meal.recipe.ingredients) {
-      existingIngredients.add(ing.ingredientId);
+      if (ing.ingredientId) existingIngredients.add(ing.ingredientId);
     }
   }
 
@@ -170,7 +170,7 @@ export function getPairingSuggestions(
       continue;
     }
 
-    const recipeIngredients = recipe.ingredients.map((i) => i.ingredientId);
+    const recipeIngredients = recipe.ingredients.map((i) => i.ingredientId).filter((id): id is string => id !== null);
     const sharedCount = recipeIngredients.filter((id) =>
       existingIngredients.has(id)
     ).length;
@@ -274,7 +274,7 @@ export function suggestEfficientWeeklyPlan(
   if (versatilityScores.length > 0) {
     const first = versatilityScores[0].recipe;
     selected.push(first);
-    first.ingredients.forEach((i) => usedIngredients.add(i.ingredientId));
+    first.ingredients.forEach((i) => { if (i.ingredientId) usedIngredients.add(i.ingredientId); });
     availableRecipes = availableRecipes.filter((r) => r.id !== first.id);
   }
 
@@ -286,10 +286,10 @@ export function suggestEfficientWeeklyPlan(
 
     for (const recipe of availableRecipes) {
       const newIngredients = recipe.ingredients.filter(
-        (i) => !usedIngredients.has(i.ingredientId)
+        (i) => i.ingredientId && !usedIngredients.has(i.ingredientId)
       ).length;
       const sharedIngredients = recipe.ingredients.filter((i) =>
-        usedIngredients.has(i.ingredientId)
+        i.ingredientId && usedIngredients.has(i.ingredientId)
       ).length;
 
       // Prefer recipes with fewer new ingredients and more shared
@@ -306,9 +306,9 @@ export function suggestEfficientWeeklyPlan(
 
     if (bestCandidate) {
       selected.push(bestCandidate);
-      bestCandidate.ingredients.forEach((i) =>
-        usedIngredients.add(i.ingredientId)
-      );
+      bestCandidate.ingredients.forEach((i) => {
+        if (i.ingredientId) usedIngredients.add(i.ingredientId);
+      });
       availableRecipes = availableRecipes.filter(
         (r) => r.id !== bestCandidate!.id
       );

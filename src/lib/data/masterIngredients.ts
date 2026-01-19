@@ -77,6 +77,8 @@ export function buildMasterIngredientList(): MasterIngredient[] {
 
   for (const recipe of allRecipes) {
     for (const ing of recipe.ingredients) {
+      // Skip ingredients without an ingredientId (user-imported recipes)
+      if (!ing.ingredientId) continue;
       const existing = ingredientMap.get(ing.ingredientId);
 
       if (existing) {
@@ -117,8 +119,8 @@ export function calculateOverlap(
 
   if (!recipeA || !recipeB) return null;
 
-  const idsA = new Set(recipeA.ingredients.map((i) => i.ingredientId));
-  const idsB = new Set(recipeB.ingredients.map((i) => i.ingredientId));
+  const idsA = new Set(recipeA.ingredients.map((i) => i.ingredientId).filter((id): id is string => id !== null));
+  const idsB = new Set(recipeB.ingredients.map((i) => i.ingredientId).filter((id): id is string => id !== null));
 
   const sharedIngredients = [...idsA].filter((id) => idsB.has(id));
   const totalUnique = new Set([...idsA, ...idsB]).size;
