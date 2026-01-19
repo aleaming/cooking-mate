@@ -59,7 +59,7 @@ function PairingCard({ pairing }: { pairing: RecipePairing }) {
   return (
     <motion.div variants={staggerItem}>
       <Link href={`/recipes/${recipe.id}`}>
-        <div className="bg-card rounded-xl p-3 border border-sand-100 dark:border-sand-700 hover:border-olive-200 dark:hover:border-olive-700 hover:shadow-sm transition-all">
+        <div className="bg-card rounded-xl p-3 hover:shadow-md transition-all">
           <div className="flex items-center gap-3">
             {/* Image */}
             {recipe.imageUrl && (
