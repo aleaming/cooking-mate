@@ -25,6 +25,11 @@ CREATE POLICY "Users can update own profile"
   USING (auth.uid() = id)
   WITH CHECK (auth.uid() = id);
 
+-- Allow profile creation during signup (triggered by handle_new_user function)
+CREATE POLICY "Enable profile creation during signup"
+  ON profiles FOR INSERT
+  WITH CHECK (auth.uid() = id);
+
 -- ============================================================
 -- INGREDIENTS POLICIES (Public read)
 -- ============================================================

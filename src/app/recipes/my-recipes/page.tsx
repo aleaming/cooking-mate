@@ -164,8 +164,7 @@ export default function MyRecipesPage() {
               </p>
             </div>
             <Link href="/recipes/import">
-              <Button variant="primary">
-                <IconPlus className="w-4 h-4 mr-2" />
+              <Button variant="primary" leftIcon={<IconPlus className="w-4 h-4" />}>
                 Import Recipe
               </Button>
             </Link>
@@ -237,8 +236,7 @@ export default function MyRecipesPage() {
               Start building your collection by importing recipes
             </p>
             <Link href="/recipes/import">
-              <Button variant="primary">
-                <IconPlus className="w-4 h-4 mr-2" />
+              <Button variant="primary" leftIcon={<IconPlus className="w-4 h-4" />}>
                 Import Your First Recipe
               </Button>
             </Link>
