@@ -6,7 +6,7 @@ import { Button } from '@/components/ui';
 import { RecipeCard } from '@/components/recipes';
 import { getFeaturedRecipes } from '@/data/recipes';
 import { pageVariants, staggerContainer, staggerItem } from '@/lib/constants/animations';
-import { IconBook, IconCalendar, IconShoppingCart, IconLeaf } from '@tabler/icons-react';
+import { IconBook, IconCalendar, IconShoppingCart, IconLeaf, IconFridge, IconDownload, IconChartBar } from '@tabler/icons-react';
 
 export default function HomePage() {
   const featuredRecipes = getFeaturedRecipes();
@@ -28,9 +28,9 @@ export default function HomePage() {
               transition={{ delay: 0.1 }}
               className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-olive-900 leading-tight"
             >
-              Embrace the
-              <span className="text-terracotta-500"> Mediterranean </span>
-              way of eating
+              Plan meals.
+              <span className="text-terracotta-500"> Shop smarter. </span>
+              Cook more.
             </motion.h1>
 
             <motion.p
@@ -39,8 +39,8 @@ export default function HomePage() {
               transition={{ delay: 0.2 }}
               className="mt-6 text-lg text-sand-700 max-w-2xl"
             >
-              Plan your meals, discover delicious recipes, and generate shopping
-              lists automatically. The healthiest diet in the world, made simple.
+              CookingMate helps you plan your week, build shopping lists automatically,
+              and discover recipes you&apos;ll actually make.
             </motion.p>
 
             <motion.div
@@ -50,9 +50,8 @@ export default function HomePage() {
               className="mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4"
             >
               <Link href="/calendar" className="w-full sm:w-auto">
-                <Button size="lg" className="w-full sm:w-auto justify-center">
+                <Button size="lg" className="w-full sm:w-auto justify-center" rightIcon={<ArrowRightIcon className="w-5 h-5" />}>
                   Start Planning
-                  <ArrowRightIcon className="w-5 h-5 ml-1" />
                 </Button>
               </Link>
               <Link href="/recipes" className="w-full sm:w-auto">
@@ -87,18 +86,18 @@ export default function HomePage() {
             initial="initial"
             whileInView="animate"
             viewport={{ once: true }}
-            className="grid md:grid-cols-3 gap-8"
+            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"
           >
             <motion.div variants={staggerItem} className="text-center">
               <div className="w-16 h-16 mx-auto bg-olive-100 rounded-2xl flex items-center justify-center mb-4">
                 <IconBook size={32} className="text-olive-600" />
               </div>
               <h3 className="font-display text-xl font-semibold text-olive-900 mb-2">
-                Curated Recipes
+                50+ pre-loaded recipes
               </h3>
               <p className="text-sand-600">
-                50+ authentic Mediterranean recipes, from quick breakfasts to
-                impressive dinners.
+                From quick breakfasts to impressive dinners. Filter by meal type,
+                difficulty, or dietary needs.
               </p>
             </motion.div>
 
@@ -107,11 +106,11 @@ export default function HomePage() {
                 <IconCalendar size={32} className="text-terracotta-600" />
               </div>
               <h3 className="font-display text-xl font-semibold text-olive-900 mb-2">
-                Easy Meal Planning
+                Drag-and-drop planning
               </h3>
               <p className="text-sand-600">
-                Drag and drop recipes onto your calendar. Plan breakfast, lunch,
-                and dinner for the whole month.
+                Drag recipes onto your calendar. Plan breakfast, lunch, and dinner
+                for the whole month.
               </p>
             </motion.div>
 
@@ -120,11 +119,49 @@ export default function HomePage() {
                 <IconShoppingCart size={32} className="text-aegean-600" />
               </div>
               <h3 className="font-display text-xl font-semibold text-olive-900 mb-2">
-                Smart Shopping Lists
+                Auto-generated lists
               </h3>
               <p className="text-sand-600">
-                Ingredients automatically aggregated from your meal plan,
-                organized by category.
+                Ingredients aggregate automatically from your meal plan, organized
+                by category.
+              </p>
+            </motion.div>
+
+            <motion.div variants={staggerItem} className="text-center">
+              <div className="w-16 h-16 mx-auto bg-sand-200 rounded-2xl flex items-center justify-center mb-4">
+                <IconFridge size={32} className="text-sand-700" />
+              </div>
+              <h3 className="font-display text-xl font-semibold text-olive-900 mb-2">
+                Cook with what you have
+              </h3>
+              <p className="text-sand-600">
+                Tell us what&apos;s in your kitchen. We&apos;ll show recipes you can make
+                right now.
+              </p>
+            </motion.div>
+
+            <motion.div variants={staggerItem} className="text-center">
+              <div className="w-16 h-16 mx-auto bg-terracotta-50 rounded-2xl flex items-center justify-center mb-4">
+                <IconDownload size={32} className="text-terracotta-500" />
+              </div>
+              <h3 className="font-display text-xl font-semibold text-olive-900 mb-2">
+                Import your favorites
+              </h3>
+              <p className="text-sand-600">
+                Add recipes from any website or markdown file to your personal
+                collection.
+              </p>
+            </motion.div>
+
+            <motion.div variants={staggerItem} className="text-center">
+              <div className="w-16 h-16 mx-auto bg-olive-50 rounded-2xl flex items-center justify-center mb-4">
+                <IconChartBar size={32} className="text-olive-500" />
+              </div>
+              <h3 className="font-display text-xl font-semibold text-olive-900 mb-2">
+                Track your progress
+              </h3>
+              <p className="text-sand-600">
+                Log meals, rate recipes, and see your cooking stats over time.
               </p>
             </motion.div>
           </motion.div>
@@ -137,10 +174,10 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
             <div>
               <h2 className="font-display text-2xl sm:text-3xl font-bold text-olive-900">
-                Featured Recipes
+                Popular recipes
               </h2>
               <p className="mt-2 text-sand-600">
-                Start with these crowd favorites
+                Favorites from our collection
               </p>
             </div>
             <Link href="/recipes" className="self-start sm:self-auto">
@@ -177,11 +214,11 @@ export default function HomePage() {
             className="bg-gradient-to-br from-olive-500 to-olive-600 rounded-3xl p-8 lg:p-12 text-center text-white"
           >
             <h2 className="font-display text-3xl lg:text-4xl font-bold mb-4">
-              Ready to eat healthier?
+              Start cooking in minutes
             </h2>
             <p className="text-olive-100 text-lg mb-8 max-w-2xl mx-auto">
-              Start planning your Mediterranean meals today. No account needed,
-              just start cooking!
+              No account required. Your meal plans save locally.
+              Sign up anytime to sync across devices.
             </p>
             <Link href="/calendar">
               <Button
@@ -189,7 +226,7 @@ export default function HomePage() {
                 size="lg"
                 className="bg-white text-olive-700 hover:bg-sand-50"
               >
-                Get Started Free
+                Plan your first week
               </Button>
             </Link>
           </motion.div>
@@ -200,7 +237,7 @@ export default function HomePage() {
       <footer className="py-8 border-t border-sand-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sand-500 text-sm">
           <p className="flex items-center justify-center gap-1">
-            Made with <IconLeaf size={16} className="text-olive-500" /> for healthy eating enthusiasts
+            Made with <IconLeaf size={16} className="text-olive-500" /> for home cooks who love good food
           </p>
         </div>
       </footer>
