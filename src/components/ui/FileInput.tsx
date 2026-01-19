@@ -228,7 +228,7 @@ export function FileInput({
           relative border-2 border-dashed rounded-xl p-6
           transition-colors cursor-pointer
           ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-olive-400 hover:bg-sand-50'}
-          ${displayError ? 'border-red-300' : ''}
+          ${displayError ? 'border-error/50' : ''}
         `}
       >
         <div className="flex flex-col items-center gap-3 text-center">
@@ -270,7 +270,7 @@ export function FileInput({
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="flex items-center gap-2 mt-2 text-sm text-red-600"
+            className="flex items-center gap-2 mt-2 text-sm text-error"
           >
             <IconAlertCircle className="w-4 h-4 flex-shrink-0" />
             <span>{displayError}</span>
@@ -297,7 +297,7 @@ export function FileInput({
                     e.stopPropagation();
                     clearAll();
                   }}
-                  className="text-xs text-red-600 hover:text-red-700"
+                  className="text-xs text-error hover:text-error/80"
                 >
                   Clear all
                 </button>

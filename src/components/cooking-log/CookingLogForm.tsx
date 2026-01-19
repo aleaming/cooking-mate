@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Button } from '@/components/ui';
+import { Button, Textarea } from '@/components/ui';
 import { StarRating } from './StarRating';
 import { CookingRating, Recipe } from '@/types';
 import { staggerContainer, staggerItem } from '@/lib/constants/animations';
@@ -128,19 +128,13 @@ export function CookingLogForm({
 
       {/* Notes */}
       <motion.div variants={staggerItem}>
-        <label
-          htmlFor="notes"
-          className="block text-sm font-medium text-olive-800 mb-2"
-        >
-          Notes (optional)
-        </label>
-        <textarea
-          id="notes"
+        <Textarea
+          label="Notes (optional)"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Any thoughts about this cooking session..."
           rows={3}
-          className="w-full px-3 py-2 rounded-xl border border-sand-200 focus:border-olive-400 focus:ring-2 focus:ring-olive-100 outline-none transition-colors resize-none text-olive-800 placeholder:text-sand-400"
+          resize="none"
         />
       </motion.div>
 

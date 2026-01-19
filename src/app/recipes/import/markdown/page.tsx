@@ -11,8 +11,7 @@ import {
   IconAlertCircle,
   IconLoader2,
 } from '@tabler/icons-react';
-import { FileInput } from '@/components/ui/FileInput';
-import { Button } from '@/components/ui/Button';
+import { FileInput, Button } from '@/components/ui';
 import { RecipePreviewCard } from '@/components/import/RecipePreviewCard';
 import { parseMultipleRecipes, validateRecipeData } from '@/lib/utils/markdownParser';
 import { createUserRecipe } from '@/lib/actions/userRecipes';
@@ -187,13 +186,15 @@ export default function MarkdownImportPage() {
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => router.back()}
-                className="p-2 -ml-2 rounded-lg hover:bg-foreground/5 transition-colors"
                 aria-label="Go back"
+                className="-ml-2"
               >
-                <IconArrowLeft className="w-5 h-5 text-foreground" />
-              </button>
+                <IconArrowLeft className="w-5 h-5" />
+              </Button>
               <div>
                 <h1 className="text-xl font-display font-semibold text-foreground">
                   Import from Markdown
@@ -310,15 +311,15 @@ export default function MarkdownImportPage() {
                   </div>
                 ) : recipe.parseError ? (
                   // Parse error
-                  <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
-                    <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
-                      <IconAlertCircle className="w-5 h-5 text-red-600" />
+                  <div className="flex items-center gap-3 p-4 bg-error/10 border border-error/30 rounded-xl">
+                    <div className="w-10 h-10 rounded-lg bg-error/20 flex items-center justify-center">
+                      <IconAlertCircle className="w-5 h-5 text-error" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-red-700">
+                      <p className="font-medium text-error">
                         {recipe.fileName}
                       </p>
-                      <p className="text-sm text-red-600">
+                      <p className="text-sm text-error/80">
                         {recipe.parseError}
                       </p>
                     </div>

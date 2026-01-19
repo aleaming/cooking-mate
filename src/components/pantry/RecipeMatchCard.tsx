@@ -14,7 +14,7 @@ export function RecipeMatchCard({ match }: RecipeMatchCardProps) {
   const { recipe, matchPercentage, missingCount } = match;
 
   const getMatchColor = (percentage: number) => {
-    if (percentage >= 80) return 'bg-green-500';
+    if (percentage >= 80) return 'bg-success';
     if (percentage >= 60) return 'bg-olive-400';
     if (percentage >= 40) return 'bg-amber-400';
     return 'bg-sand-300';
@@ -72,7 +72,7 @@ export function RecipeMatchCard({ match }: RecipeMatchCardProps) {
           {/* Missing Info */}
           <div className="text-xs text-sand-500">
             {missingCount === 0 ? (
-              <span className="text-green-600 font-medium">
+              <span className="text-success font-medium">
                 Ready to cook!
               </span>
             ) : (

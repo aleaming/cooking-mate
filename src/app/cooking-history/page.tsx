@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Button, Badge } from '@/components/ui';
+import { Button, Badge, Select } from '@/components/ui';
 import { StarRating } from '@/components/cooking-log';
 import { useCookingLogStore } from '@/stores/useCookingLogStore';
 import { getRecipeById } from '@/data/recipes';
@@ -163,14 +163,16 @@ export default function CookingHistoryPage() {
           </div>
 
           {/* Sort */}
-          <select
+          <Select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortBy)}
-            className="px-3 py-2 text-sm bg-white rounded-xl border-none shadow-sm text-olive-800"
-          >
-            <option value="date">Sort by date</option>
-            <option value="rating">Sort by rating</option>
-          </select>
+            size="sm"
+            options={[
+              { value: 'date', label: 'Sort by date' },
+              { value: 'rating', label: 'Sort by rating' },
+            ]}
+            className="w-auto shadow-sm"
+          />
         </motion.div>
 
         {/* Sessions List */}

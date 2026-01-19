@@ -13,8 +13,7 @@ import {
   IconAlertCircle,
   IconSparkles,
 } from '@tabler/icons-react';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
+import { Input, Button } from '@/components/ui';
 import { RecipePreviewCard } from '@/components/import/RecipePreviewCard';
 import { scrapeRecipeFromUrl } from '@/lib/actions/scrapeRecipe';
 import { createUserRecipe } from '@/lib/actions/userRecipes';
@@ -167,13 +166,15 @@ export default function UrlImportPage() {
       <div className="bg-card border-b border-border sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => router.back()}
-              className="p-2 -ml-2 rounded-lg hover:bg-foreground/5 transition-colors"
               aria-label="Go back"
+              className="-ml-2"
             >
-              <IconArrowLeft className="w-5 h-5 text-foreground" />
-            </button>
+              <IconArrowLeft className="w-5 h-5" />
+            </Button>
             <div>
               <h1 className="text-xl font-display font-semibold text-foreground">
                 Import from URL
@@ -276,13 +277,14 @@ export default function UrlImportPage() {
 
               {/* Back/Reset button */}
               {state === 'preview' && (
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={handleReset}
-                  className="flex items-center gap-2 text-sm text-muted hover:text-foreground transition-colors"
+                  leftIcon={<IconArrowLeft className="w-4 h-4" />}
                 >
-                  <IconArrowLeft className="w-4 h-4" />
                   Try a different URL
-                </button>
+                </Button>
               )}
 
               {/* Recipe preview */}

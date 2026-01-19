@@ -57,7 +57,7 @@ export function MealSlot({ mealType, recipe, date, isOver, onClick, onRemove }: 
         opacity: 1,
         scale: isOver ? 1.02 : 1,
         borderColor: isOver ? 'rgb(34, 197, 94)' : undefined,
-        backgroundColor: isOver ? 'rgb(34, 197, 94, 0.1)' : undefined,
+        backgroundColor: isOver ? 'var(--olive-100)' : undefined,
       }}
       transition={SPRING.gentle}
       onClick={onClick}
@@ -65,7 +65,7 @@ export function MealSlot({ mealType, recipe, date, isOver, onClick, onRemove }: 
         relative rounded-lg border-2 border-dashed p-1.5 min-h-[52px]
         cursor-pointer transition-colors
         ${recipe ? `${colors.bg} ${colors.border} border-solid` : 'border-sand-200 hover:border-sand-300 hover:bg-sand-50'}
-        ${isOver ? 'border-green-400 bg-green-50' : ''}
+        ${isOver ? 'border-olive-400 bg-olive-50' : ''}
       `}
     >
       {recipe ? (

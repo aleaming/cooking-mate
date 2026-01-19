@@ -7,7 +7,7 @@ import {
   IconTrash,
   IconGripVertical,
 } from '@tabler/icons-react';
-import { Input } from '@/components/ui/Input';
+import { Input, Button } from '@/components/ui';
 import type { ParsedIngredient } from '@/types/recipe';
 
 export interface IngredientEditorProps {
@@ -81,13 +81,14 @@ export function IngredientEditor({
           Ingredients ({ingredients.length})
         </h4>
         {!disabled && (
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={handleAdd}
-            className="flex items-center gap-1 text-sm text-olive-600 hover:text-olive-700"
+            leftIcon={<IconPlus className="w-4 h-4" />}
           >
-            <IconPlus className="w-4 h-4" />
             Add
-          </button>
+          </Button>
         )}
       </div>
 
@@ -95,12 +96,9 @@ export function IngredientEditor({
         <div className="text-center py-6 border-2 border-dashed border-sand-200 rounded-lg">
           <p className="text-sm text-muted mb-2">No ingredients</p>
           {!disabled && (
-            <button
-              onClick={handleAdd}
-              className="text-sm text-olive-600 hover:text-olive-700"
-            >
+            <Button variant="ghost" size="sm" onClick={handleAdd}>
               Add your first ingredient
-            </button>
+            </Button>
           )}
         </div>
       ) : (
@@ -193,20 +191,23 @@ export function IngredientEditor({
                 {!disabled && (
                   <div className="flex items-center gap-1">
                     {editingIndex === index && (
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => setEditingIndex(null)}
-                        className="p-1.5 text-xs text-olive-600 hover:text-olive-700"
                       >
                         Done
-                      </button>
+                      </Button>
                     )}
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
                       onClick={() => handleRemove(index)}
-                      className="p-1.5 rounded hover:bg-red-50 text-red-400 hover:text-red-600 transition-colors"
                       aria-label="Remove ingredient"
+                      className="text-error hover:bg-error/10"
                     >
                       <IconTrash className="w-4 h-4" />
-                    </button>
+                    </Button>
                   </div>
                 )}
               </motion.div>

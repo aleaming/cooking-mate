@@ -212,7 +212,7 @@ export function TimerModal({ isOpen, onClose, initialSeconds, label }: TimerModa
                     stroke="currentColor"
                     strokeWidth="6"
                     strokeLinecap="round"
-                    className={isComplete ? 'text-green-500' : 'text-olive-500'}
+                    className={isComplete ? 'text-success' : 'text-olive-500'}
                     initial={{ pathLength: 1 }}
                     animate={{ pathLength: progress / 100 }}
                     transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -231,8 +231,8 @@ export function TimerModal({ isOpen, onClose, initialSeconds, label }: TimerModa
                       animate={{ scale: 1 }}
                       transition={SPRING.bouncy}
                     >
-                      <IconCheck size={48} className="text-green-500" />
-                      <p className="text-green-600 font-semibold mt-2">Done!</p>
+                      <IconCheck size={48} className="text-success" />
+                      <p className="text-success font-semibold mt-2">Done!</p>
                     </motion.div>
                   ) : (
                     <>
@@ -267,7 +267,7 @@ export function TimerModal({ isOpen, onClose, initialSeconds, label }: TimerModa
                   onClick={handlePlayPause}
                   className={`min-w-[64px] min-h-[64px] flex items-center justify-center rounded-full transition-colors ${
                     isComplete
-                      ? 'bg-green-500 hover:bg-green-600 text-white'
+                      ? 'bg-success hover:bg-success/90 text-white'
                       : isPaused
                       ? 'bg-olive-500 hover:bg-olive-600 text-white'
                       : 'bg-terracotta-500 hover:bg-terracotta-600 text-white'

@@ -31,12 +31,12 @@ export function ScalingWarningBanner({
   const getWarningColor = (type: ScalingWarning['type']) => {
     switch (type) {
       case 'minimum-threshold':
-        return 'bg-red-50 border-red-200 text-red-800';
+        return 'bg-terracotta-50 border-terracotta-200 text-terracotta-800';
       case 'non-linear':
         return 'bg-amber-50 border-amber-200 text-amber-800';
       case 'technique-change':
       case 'timing-adjustment':
-        return 'bg-blue-50 border-blue-200 text-blue-800';
+        return 'bg-aegean-50 border-aegean-200 text-aegean-800';
       default:
         return 'bg-amber-50 border-amber-200 text-amber-800';
     }

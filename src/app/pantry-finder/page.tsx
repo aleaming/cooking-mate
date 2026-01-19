@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '@/components/ui';
+import { Button, Select } from '@/components/ui';
 import {
   IngredientSearch,
   IngredientChip,
@@ -145,38 +145,42 @@ export default function PantryFinderPage() {
                 {/* Match Threshold */}
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-sand-600">Min match:</span>
-                  <select
+                  <Select
                     value={minMatch}
                     onChange={(e) => setMinMatch(Number(e.target.value))}
-                    className="px-2 py-1 text-sm bg-white rounded-lg border border-sand-200 text-olive-800"
-                  >
-                    <option value={0}>Any</option>
-                    <option value={30}>30%+</option>
-                    <option value={50}>50%+</option>
-                    <option value={70}>70%+</option>
-                  </select>
+                    size="sm"
+                    options={[
+                      { value: 0, label: 'Any' },
+                      { value: 30, label: '30%+' },
+                      { value: 50, label: '50%+' },
+                      { value: 70, label: '70%+' },
+                    ]}
+                    className="w-auto"
+                  />
                 </div>
 
                 {/* Sort */}
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-sand-600">Sort by:</span>
-                  <select
+                  <Select
                     value={sortBy}
                     onChange={(e) =>
                       setSortBy(e.target.value as 'matchPercentage' | 'missingCount')
                     }
-                    className="px-2 py-1 text-sm bg-white rounded-lg border border-sand-200 text-olive-800"
-                  >
-                    <option value="matchPercentage">Best match</option>
-                    <option value="missingCount">Fewest missing</option>
-                  </select>
+                    size="sm"
+                    options={[
+                      { value: 'matchPercentage', label: 'Best match' },
+                      { value: 'missingCount', label: 'Fewest missing' },
+                    ]}
+                    className="w-auto"
+                  />
                 </div>
 
                 {/* Stats */}
                 {results && (
                   <div className="flex-1 text-right text-sm text-sand-500">
                     {results.perfectMatches > 0 && (
-                      <span className="text-green-600 font-medium">
+                      <span className="text-success font-medium">
                         {results.perfectMatches} ready to cook
                       </span>
                     )}

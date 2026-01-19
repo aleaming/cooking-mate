@@ -5,8 +5,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { IconArrowLeft, IconLoader2 } from '@tabler/icons-react';
-import { Button } from '@/components/ui/Button';
-import { Skeleton } from '@/components/ui/Skeleton';
+import { Button, Skeleton } from '@/components/ui';
 import { RecipePreviewCard } from '@/components/import/RecipePreviewCard';
 import { getUserRecipeById, updateUserRecipe } from '@/lib/actions/userRecipes';
 import { inferIngredientCategory } from '@/lib/utils/ingredientCategory';
@@ -165,11 +164,11 @@ export default function EditRecipePage() {
               </Button>
             </Link>
           </div>
-          <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
-            <h2 className="text-lg font-semibold text-red-800 mb-2">
+          <div className="bg-error/10 border border-error/30 rounded-xl p-6 text-center">
+            <h2 className="text-lg font-semibold text-error mb-2">
               Unable to Load Recipe
             </h2>
-            <p className="text-red-600">{error}</p>
+            <p className="text-error/80">{error}</p>
             <Button
               variant="outline"
               className="mt-4"

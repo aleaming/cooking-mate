@@ -225,13 +225,14 @@ export default function ProfilePage() {
                             <h2 className="font-display text-xl font-semibold text-olive-900 truncate">
                               {profile?.display_name || 'User'}
                             </h2>
-                            <button
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
                               onClick={() => setIsEditing(true)}
-                              className="p-1.5 rounded-lg hover:bg-sand-100 transition-colors"
                               aria-label="Edit display name"
                             >
-                              <IconEdit size={16} className="text-sand-500" />
-                            </button>
+                              <IconEdit size={16} />
+                            </Button>
                           </div>
                           <p className="text-sand-500 truncate">{profile?.email}</p>
                         </>

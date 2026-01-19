@@ -30,3 +30,9 @@ export type { ImageEditorProps } from './ImageEditor';
 
 export { Logo } from './Logo';
 export type { LogoProps } from './Logo';
+
+export { Select } from './Select';
+export type { SelectProps, SelectOption, SelectSize } from './Select';
+
+export { Textarea } from './Textarea';
+export type { TextareaProps } from './Textarea';

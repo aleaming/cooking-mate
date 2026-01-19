@@ -435,13 +435,13 @@ export default function SettingsPage() {
 
           {/* Row 3: Danger Zone (full width) */}
           <motion.div variants={staggerItem}>
-            <Card className="border-2 border-red-200">
+            <Card className="border-2 border-error/30">
               <CardHeader className="p-6 pb-0">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
-                    <IconAlertTriangle size={20} className="text-red-600" />
+                  <div className="w-10 h-10 rounded-xl bg-error/10 flex items-center justify-center">
+                    <IconAlertTriangle size={20} className="text-error" />
                   </div>
-                  <CardTitle className="text-red-700">Danger Zone</CardTitle>
+                  <CardTitle className="text-error">Danger Zone</CardTitle>
                 </div>
               </CardHeader>
               <CardContent className="p-6">
@@ -454,7 +454,7 @@ export default function SettingsPage() {
                   </div>
                   <Button
                     variant="outline"
-                    className="border-red-300 text-red-600 hover:bg-red-50 shrink-0"
+                    className="border-error/50 text-error hover:bg-error/10 shrink-0"
                     leftIcon={<IconTrash size={18} />}
                     onClick={() => setShowDeleteModal(true)}
                   >
@@ -478,7 +478,7 @@ export default function SettingsPage() {
         size="sm"
       >
         <div className="space-y-4">
-          <div className="flex items-center gap-3 p-3 bg-red-50 rounded-xl text-red-700">
+          <div className="flex items-center gap-3 p-3 bg-error/10 rounded-xl text-error">
             <IconAlertTriangle size={24} />
             <p className="text-sm">
               This action cannot be undone. All your data will be permanently deleted.
@@ -503,7 +503,7 @@ export default function SettingsPage() {
               Cancel
             </Button>
             <Button
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-error hover:bg-error/90"
               onClick={handleDeleteAccount}
               isLoading={isDeleting}
               disabled={deleteConfirmation !== 'DELETE'}

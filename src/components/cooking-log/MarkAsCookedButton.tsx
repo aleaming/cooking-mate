@@ -41,7 +41,7 @@ export function MarkAsCookedButton({
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={SPRING.bouncy}
-        className={`${sizeStyles[size]} rounded-full bg-green-500 flex items-center justify-center`}
+        className={`${sizeStyles[size]} rounded-full bg-success flex items-center justify-center`}
         title="Already logged"
       >
         <svg
@@ -73,8 +73,8 @@ export function MarkAsCookedButton({
         }}
         className={`
           ${sizeStyles[size]} rounded-full
-          bg-olive-100 hover:bg-green-100
-          border-2 border-olive-300 hover:border-green-400
+          bg-olive-100 hover:bg-olive-200
+          border-2 border-olive-300 hover:border-olive-400
           flex items-center justify-center
           transition-colors
         `}
@@ -82,7 +82,7 @@ export function MarkAsCookedButton({
         aria-label="Mark as cooked"
       >
         <svg
-          className="w-full h-full text-olive-500 hover:text-green-600"
+          className="w-full h-full text-olive-500 hover:text-olive-600"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"

@@ -133,7 +133,7 @@ export function PhotoGalleryManager({
 
       {/* Error message */}
       {uploadError && (
-        <div className="text-sm text-red-600 bg-red-50 p-2 rounded-lg">
+        <div className="text-sm text-error bg-error/10 p-2 rounded-lg">
           {uploadError}
         </div>
       )}
@@ -204,11 +204,11 @@ export function PhotoGalleryManager({
                     )}
                     <button
                       onClick={(e) => handleRemove(photo.id, e)}
-                      className="p-1.5 bg-white rounded-full shadow hover:bg-red-50 transition-colors"
+                      className="p-1.5 bg-white rounded-full shadow hover:bg-error/10 transition-colors"
                       aria-label="Remove photo"
                       title="Remove"
                     >
-                      <IconTrash className="w-4 h-4 text-red-600" />
+                      <IconTrash className="w-4 h-4 text-error" />
                     </button>
                   </div>
                 )}

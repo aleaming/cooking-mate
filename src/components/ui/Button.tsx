@@ -5,7 +5,7 @@ import { motion, type HTMLMotionProps } from 'framer-motion';
 import { SPRING } from '@/lib/constants/animations';
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost';
-type ButtonSize = 'sm' | 'md' | 'lg';
+type ButtonSize = 'sm' | 'md' | 'lg' | 'icon' | 'icon-sm';
 
 interface ButtonProps
   extends Omit<HTMLMotionProps<'button'>, 'children'>,
@@ -33,6 +33,8 @@ const sizeStyles: Record<ButtonSize, string> = {
   sm: 'px-3 py-2.5 text-sm rounded-lg gap-1.5 min-h-[44px]',
   md: 'px-4 py-2.5 text-base rounded-xl gap-2 min-h-[44px]',
   lg: 'px-6 py-3 text-lg rounded-2xl gap-2.5 min-h-[48px]',
+  icon: 'p-2.5 rounded-xl min-h-[44px] min-w-[44px]',
+  'icon-sm': 'p-1.5 rounded-lg min-h-[32px] min-w-[32px]',
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(

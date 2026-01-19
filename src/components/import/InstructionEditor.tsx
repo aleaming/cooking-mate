@@ -7,6 +7,7 @@ import {
   IconTrash,
   IconGripVertical,
 } from '@tabler/icons-react';
+import { Textarea, Button } from '@/components/ui';
 import type { ParsedInstruction } from '@/types/recipe';
 
 export interface InstructionEditorProps {
@@ -75,13 +76,14 @@ export function InstructionEditor({
           Instructions ({instructions.length})
         </h4>
         {!disabled && (
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={handleAdd}
-            className="flex items-center gap-1 text-sm text-olive-600 hover:text-olive-700"
+            leftIcon={<IconPlus className="w-4 h-4" />}
           >
-            <IconPlus className="w-4 h-4" />
             Add
-          </button>
+          </Button>
         )}
       </div>
 
@@ -89,12 +91,9 @@ export function InstructionEditor({
         <div className="text-center py-6 border-2 border-dashed border-sand-200 rounded-lg">
           <p className="text-sm text-muted mb-2">No instructions</p>
           {!disabled && (
-            <button
-              onClick={handleAdd}
-              className="text-sm text-olive-600 hover:text-olive-700"
-            >
+            <Button variant="ghost" size="sm" onClick={handleAdd}>
               Add your first step
-            </button>
+            </Button>
           )}
         </div>
       ) : (
@@ -135,14 +134,15 @@ export function InstructionEditor({
                 <div className="flex-1">
                   {editingIndex === index ? (
                     <div className="space-y-2">
-                      <textarea
+                      <Textarea
                         value={instruction.text}
                         onChange={(e) => handleUpdate(index, 'text', e.target.value)}
                         placeholder="Describe this step..."
                         rows={3}
-                        className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-olive-500 focus:border-transparent resize-none"
+                        resize="none"
                         disabled={disabled}
                         autoFocus
+                        className="text-sm"
                       />
                       <div className="flex items-center gap-4">
                         <label className="flex items-center gap-2 text-xs text-muted">
@@ -162,12 +162,13 @@ export function InstructionEditor({
                             disabled={disabled}
                           />
                         </label>
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => setEditingIndex(null)}
-                          className="text-xs text-olive-600 hover:text-olive-700 font-medium"
                         >
                           Done
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   ) : (
@@ -199,13 +200,15 @@ export function InstructionEditor({
 
                 {/* Actions */}
                 {!disabled && (
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
                     onClick={() => handleRemove(index)}
-                    className="p-1.5 rounded hover:bg-red-50 text-red-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100"
                     aria-label="Remove step"
+                    className="text-error hover:bg-error/10 opacity-0 group-hover:opacity-100"
                   >
                     <IconTrash className="w-4 h-4" />
-                  </button>
+                  </Button>
                 )}
               </motion.div>
             </Reorder.Item>

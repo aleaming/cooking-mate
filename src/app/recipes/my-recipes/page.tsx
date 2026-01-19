@@ -12,9 +12,7 @@ import {
   IconSearch,
   IconChefHat,
 } from '@tabler/icons-react';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Modal } from '@/components/ui/Modal';
+import { Button, Input, Modal } from '@/components/ui';
 import { RecipeCard } from '@/components/recipes';
 import { getUserRecipes, deleteUserRecipe } from '@/lib/actions/userRecipes';
 import { pageVariants, staggerContainer, staggerItem } from '@/lib/constants/animations';
@@ -219,7 +217,7 @@ export default function MyRecipesPage() {
         {/* Error state */}
         {error && !isLoading && (
           <div className="text-center py-16">
-            <p className="text-red-600 mb-4">{error}</p>
+            <p className="text-error mb-4">{error}</p>
             <Button variant="outline" onClick={fetchRecipes}>
               Try Again
             </Button>
@@ -303,7 +301,7 @@ export default function MyRecipesPage() {
               variant="primary"
               onClick={handleDelete}
               disabled={isDeleting}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-error hover:bg-error/90"
             >
               {isDeleting ? 'Deleting...' : 'Delete'}
             </Button>

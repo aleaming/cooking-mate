@@ -165,7 +165,7 @@ export function AddToMealPlanDrawer({ isOpen, onClose, recipe }: AddToMealPlanDr
               animate={{ scale: 1 }}
               transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.1 }}
             >
-              <CheckCircleIcon className="w-20 h-20 text-green-500 mb-4" />
+              <CheckCircleIcon className="w-20 h-20 text-success mb-4" />
             </motion.div>
             <motion.p
               initial={{ opacity: 0, y: 10 }}

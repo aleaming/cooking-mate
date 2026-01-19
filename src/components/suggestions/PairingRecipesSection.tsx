@@ -83,7 +83,7 @@ function PairingCard({ pairing }: { pairing: RecipePairing }) {
                     transition={{ duration: 0.5, delay: 0.2 }}
                     className={`h-full rounded-full ${
                       efficiencyPercent > 70
-                        ? 'bg-green-500'
+                        ? 'bg-success'
                         : efficiencyPercent > 40
                         ? 'bg-olive-400'
                         : 'bg-sand-300'

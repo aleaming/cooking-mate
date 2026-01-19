@@ -12,9 +12,7 @@ import {
   IconCheck,
   IconAlertCircle,
 } from '@tabler/icons-react';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
+import { Input, Button, Badge, Select, Textarea } from '@/components/ui';
 import { IngredientEditor } from './IngredientEditor';
 import { InstructionEditor } from './InstructionEditor';
 import type {
@@ -148,7 +146,7 @@ export function RecipePreviewCard({
               e.stopPropagation();
               onRemove();
             }}
-            className="p-2 rounded-lg hover:bg-red-50 text-red-400 hover:text-red-600 transition-colors"
+            className="p-2 rounded-lg hover:bg-error/10 text-error/60 hover:text-error transition-colors"
             aria-label="Remove recipe"
           >
             <IconX className="w-5 h-5" />
@@ -179,18 +177,14 @@ export function RecipePreviewCard({
               error={!recipe.title ? 'Title is required' : undefined}
             />
 
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1">
-                Description
-              </label>
-              <textarea
-                value={recipe.description || ''}
-                onChange={(e) => handleFieldChange('description', e.target.value || undefined)}
-                placeholder="Brief description of the recipe..."
-                rows={2}
-                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-olive-500 focus:border-transparent resize-none"
-              />
-            </div>
+            <Textarea
+              label="Description"
+              value={recipe.description || ''}
+              onChange={(e) => handleFieldChange('description', e.target.value || undefined)}
+              placeholder="Brief description of the recipe..."
+              rows={2}
+              resize="none"
+            />
           </div>
 
           {/* Timing & Servings */}
@@ -276,45 +270,26 @@ export function RecipePreviewCard({
               className="space-y-4 pt-2"
             >
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="flex items-center gap-1 text-sm font-medium text-foreground mb-1">
-                    <IconChefHat className="w-4 h-4" />
-                    Meal Type
-                  </label>
-                  <select
-                    value={recipe.mealType || ''}
-                    onChange={(e) =>
-                      handleFieldChange('mealType', (e.target.value as MealType) || undefined)
-                    }
-                    className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-olive-500"
-                  >
-                    <option value="">Select...</option>
-                    {MEAL_TYPE_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Difficulty
-                  </label>
-                  <select
-                    value={recipe.difficulty || ''}
-                    onChange={(e) =>
-                      handleFieldChange('difficulty', (e.target.value as Difficulty) || undefined)
-                    }
-                    className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-olive-500"
-                  >
-                    <option value="">Select...</option>
-                    {DIFFICULTY_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <Select
+                  label="Meal Type"
+                  value={recipe.mealType || ''}
+                  onChange={(e) =>
+                    handleFieldChange('mealType', (e.target.value as MealType) || undefined)
+                  }
+                  placeholder="Select..."
+                  options={MEAL_TYPE_OPTIONS}
+                  size="sm"
+                />
+                <Select
+                  label="Difficulty"
+                  value={recipe.difficulty || ''}
+                  onChange={(e) =>
+                    handleFieldChange('difficulty', (e.target.value as Difficulty) || undefined)
+                  }
+                  placeholder="Select..."
+                  options={DIFFICULTY_OPTIONS}
+                  size="sm"
+                />
               </div>
 
               <div>
@@ -368,7 +343,7 @@ export function RecipePreviewCard({
 
           {/* Error message */}
           {saveError && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+            <div className="p-3 bg-error/10 border border-error/30 rounded-lg text-sm text-error">
               {saveError}
             </div>
           )}

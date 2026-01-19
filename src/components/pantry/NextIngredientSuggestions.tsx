@@ -52,7 +52,7 @@ export function NextIngredientSuggestions({
               </p>
               <p className="text-xs text-sand-500">
                 {suggestion.unlockCount > 0 && (
-                  <span className="text-green-600 font-medium">
+                  <span className="text-success font-medium">
                     Unlocks {suggestion.unlockCount} recipe{suggestion.unlockCount !== 1 ? 's' : ''}
                   </span>
                 )}

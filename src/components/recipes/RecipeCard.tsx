@@ -106,10 +106,10 @@ const RecipeCard = forwardRef<HTMLDivElement, RecipeCardProps>(
                     e.stopPropagation();
                     onDelete();
                   }}
-                  className="p-2 bg-white rounded-lg shadow hover:bg-red-50 transition-colors"
+                  className="p-2 bg-white rounded-lg shadow hover:bg-error/10 transition-colors"
                   aria-label="Delete recipe"
                 >
-                  <IconTrash className="w-4 h-4 text-red-600" />
+                  <IconTrash className="w-4 h-4 text-error" />
                 </button>
               )}
             </div>
