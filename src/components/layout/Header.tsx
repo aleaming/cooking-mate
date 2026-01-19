@@ -13,6 +13,7 @@ import {
   IconChartBar,
   IconToolsKitchen2,
   IconUser,
+  IconSettings,
   IconLogout,
   IconLogin,
 } from '@tabler/icons-react';
@@ -86,7 +87,7 @@ export function Header() {
   }, [isMobileMenuOpen]);
 
   return (
-    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-sand-200">
+    <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b border-foreground/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -97,7 +98,7 @@ export function Header() {
             >
               <IconToolsKitchen2 size={28} />
             </motion.div>
-            <span className="font-display text-xl font-semibold text-olive-800 whitespace-nowrap">
+            <span className="font-display text-xl font-semibold text-foreground whitespace-nowrap">
               Cooking Mate
             </span>
           </Link>
@@ -115,8 +116,8 @@ export function Header() {
                   <span
                     className={
                       isActive
-                        ? 'text-olive-700'
-                        : 'text-sand-600 hover:text-olive-700'
+                        ? 'text-olive-600'
+                        : 'text-foreground/70 hover:text-olive-600'
                     }
                   >
                     {item.label}
@@ -133,9 +134,9 @@ export function Header() {
             })}
 
             {/* User Menu / Sign In */}
-            <div className="ml-2 pl-2 border-l border-sand-200">
+            <div className="ml-2 pl-2 border-l border-foreground/10">
               {isLoading ? (
-                <div className="w-10 h-10 rounded-full bg-sand-100 animate-pulse" />
+                <div className="w-10 h-10 rounded-full bg-foreground/10 animate-pulse" />
               ) : user ? (
                 <div className="relative">
                   <button
@@ -156,18 +157,35 @@ export function Header() {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: -5 }}
                         transition={{ duration: 0.15 }}
-                        className="absolute right-0 top-12 w-56 bg-white rounded-xl shadow-lg border border-sand-200 py-2 z-50"
+                        className="absolute right-0 top-12 w-56 bg-card rounded-xl shadow-lg border border-foreground/10 py-2 z-50"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <div className="px-4 py-2 border-b border-sand-100">
-                          <p className="text-sm font-medium text-olive-800 truncate">
+                        <div className="px-4 py-2 border-b border-foreground/10">
+                          <p className="text-sm font-medium text-foreground truncate">
                             {user.email}
                           </p>
                         </div>
+                        <Link
+                          href="/profile"
+                          onClick={closeUserMenu}
+                          className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-foreground/80 hover:bg-foreground/5 transition-colors"
+                        >
+                          <IconUser size={18} />
+                          Profile
+                        </Link>
+                        <Link
+                          href="/settings"
+                          onClick={closeUserMenu}
+                          className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-foreground/80 hover:bg-foreground/5 transition-colors"
+                        >
+                          <IconSettings size={18} />
+                          Settings
+                        </Link>
+                        <div className="border-t border-foreground/10 my-1" />
                         <form action={logout}>
                           <button
                             type="submit"
-                            className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-sand-700 hover:bg-sand-50 transition-colors"
+                            className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-foreground/80 hover:bg-foreground/5 transition-colors"
                           >
                             <IconLogout size={18} />
                             Sign out
@@ -180,7 +198,7 @@ export function Header() {
               ) : (
                 <Link
                   href="/login"
-                  className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-olive-700 hover:bg-olive-100 rounded-lg transition-colors min-h-[44px]"
+                  className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-olive-600 hover:bg-olive-500/10 rounded-lg transition-colors min-h-[44px]"
                 >
                   <IconLogin size={18} />
                   Sign in
@@ -191,7 +209,7 @@ export function Header() {
 
           {/* Mobile Menu Button - 44x44px minimum touch target */}
           <button
-            className="md:hidden min-w-[44px] min-h-[44px] flex items-center justify-center text-sand-600 hover:text-olive-700 active:bg-sand-100 rounded-lg transition-colors"
+            className="md:hidden min-w-[44px] min-h-[44px] flex items-center justify-center text-foreground/70 hover:text-olive-600 active:bg-foreground/5 rounded-lg transition-colors"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={isMobileMenuOpen}
@@ -254,7 +272,7 @@ export function Header() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
-              className="absolute left-0 right-0 top-16 bg-white border-b border-sand-200 shadow-lg z-50 md:hidden"
+              className="absolute left-0 right-0 top-16 bg-card border-b border-foreground/10 shadow-lg z-50 md:hidden"
             >
               <div className="max-w-7xl mx-auto px-4 py-4">
                 <div className="flex flex-col gap-1">
@@ -274,13 +292,13 @@ export function Header() {
                             min-h-[48px] text-base font-medium
                             transition-colors active:scale-[0.98]
                             ${isActive
-                              ? 'bg-olive-100 text-olive-700'
-                              : 'text-sand-700 hover:bg-sand-100 active:bg-sand-200'
+                              ? 'bg-olive-500/10 text-olive-600'
+                              : 'text-foreground/80 hover:bg-foreground/5 active:bg-foreground/10'
                             }
                           `}
                           onClick={closeMobileMenu}
                         >
-                          <item.icon size={24} className={isActive ? 'text-olive-600' : 'text-sand-500'} />
+                          <item.icon size={24} className={isActive ? 'text-olive-600' : 'text-foreground/50'} />
                           <span className="whitespace-nowrap">{item.label}</span>
                           {isActive && (
                             <motion.div
@@ -294,7 +312,7 @@ export function Header() {
                   })}
 
                   {/* Divider */}
-                  <div className="my-2 border-t border-sand-200" />
+                  <div className="my-2 border-t border-foreground/10" />
 
                   {/* User Section in Mobile Menu */}
                   {!isLoading && (
@@ -306,18 +324,35 @@ export function Header() {
                       {user ? (
                         <>
                           <div className="px-4 py-2 mb-1">
-                            <p className="text-sm text-sand-500">Signed in as</p>
-                            <p className="text-sm font-medium text-olive-800 truncate">
+                            <p className="text-sm text-foreground/60">Signed in as</p>
+                            <p className="text-sm font-medium text-foreground truncate">
                               {user.email}
                             </p>
                           </div>
+                          <Link
+                            href="/profile"
+                            className="flex items-center gap-3 px-4 py-3 rounded-xl min-h-[48px] text-base font-medium text-foreground/80 hover:bg-foreground/5 active:bg-foreground/10 transition-colors w-full"
+                            onClick={closeMobileMenu}
+                          >
+                            <IconUser size={24} className="text-foreground/50" />
+                            <span>Profile</span>
+                          </Link>
+                          <Link
+                            href="/settings"
+                            className="flex items-center gap-3 px-4 py-3 rounded-xl min-h-[48px] text-base font-medium text-foreground/80 hover:bg-foreground/5 active:bg-foreground/10 transition-colors w-full"
+                            onClick={closeMobileMenu}
+                          >
+                            <IconSettings size={24} className="text-foreground/50" />
+                            <span>Settings</span>
+                          </Link>
+                          <div className="my-2 border-t border-foreground/10" />
                           <form action={logout}>
                             <button
                               type="submit"
                               onClick={closeMobileMenu}
-                              className="flex items-center gap-3 px-4 py-3 rounded-xl min-h-[48px] text-base font-medium text-sand-700 hover:bg-sand-100 active:bg-sand-200 transition-colors w-full"
+                              className="flex items-center gap-3 px-4 py-3 rounded-xl min-h-[48px] text-base font-medium text-foreground/80 hover:bg-foreground/5 active:bg-foreground/10 transition-colors w-full"
                             >
-                              <IconLogout size={24} className="text-sand-500" />
+                              <IconLogout size={24} className="text-foreground/50" />
                               <span>Sign out</span>
                             </button>
                           </form>
@@ -325,7 +360,7 @@ export function Header() {
                       ) : (
                         <Link
                           href="/login"
-                          className="flex items-center gap-3 px-4 py-3 rounded-xl min-h-[48px] text-base font-medium text-olive-700 bg-olive-50 hover:bg-olive-100 transition-colors"
+                          className="flex items-center gap-3 px-4 py-3 rounded-xl min-h-[48px] text-base font-medium text-olive-600 bg-olive-500/10 hover:bg-olive-500/20 transition-colors"
                           onClick={closeMobileMenu}
                         >
                           <IconLogin size={24} className="text-olive-600" />
@@ -343,3 +378,4 @@ export function Header() {
     </header>
   );
 }
+

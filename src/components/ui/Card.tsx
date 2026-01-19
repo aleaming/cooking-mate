@@ -40,8 +40,8 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
         whileTap={clickable ? 'tap' : undefined}
         transition={SPRING.gentle}
         className={`
-          bg-white rounded-2xl
-          shadow-lg shadow-sand-200/50
+          bg-card rounded-2xl
+          shadow-lg shadow-black/10
           ${clickable ? 'cursor-pointer' : ''}
           ${paddingStyles[padding]}
           ${className}
@@ -88,7 +88,7 @@ const CardTitle = forwardRef<HTMLHeadingElement, CardTitleProps>(
     return (
       <Component
         ref={ref}
-        className={`font-display text-xl font-semibold text-olive-900 ${className}`}
+        className={`font-display text-xl font-semibold text-card-foreground ${className}`}
         {...props}
       >
         {children}
@@ -109,7 +109,7 @@ const CardContent = forwardRef<HTMLDivElement, CardContentProps>(
     return (
       <div
         ref={ref}
-        className={`text-sand-700 ${className}`}
+        className={`text-foreground/70 ${className}`}
         {...props}
       >
         {children}
@@ -130,7 +130,7 @@ const CardFooter = forwardRef<HTMLDivElement, CardFooterProps>(
     return (
       <div
         ref={ref}
-        className={`mt-4 pt-4 border-t border-sand-200 ${className}`}
+        className={`mt-4 pt-4 border-t border-foreground/10 ${className}`}
         {...props}
       >
         {children}

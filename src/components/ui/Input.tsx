@@ -36,14 +36,14 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-sm font-medium text-olive-800 mb-1.5"
+            className="block text-sm font-medium text-foreground mb-1.5"
           >
             {label}
           </label>
         )}
         <div className="relative">
           {leftIcon && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-sand-500">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/50">
               {leftIcon}
             </div>
           )}
@@ -60,20 +60,20 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             }}
             className={`
               w-full px-4 py-2.5 min-h-[44px] rounded-xl
-              border-2 bg-white
-              text-base text-olive-900 placeholder:text-sand-400
+              border-2 bg-card
+              text-base text-foreground placeholder:text-sand-400
               transition-all duration-200
               focus:outline-none focus:ring-2 focus:ring-olive-500/20
               disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-sand-50
               ${leftIcon ? 'pl-10' : ''}
               ${rightIcon ? 'pr-10' : ''}
-              ${error ? 'border-error focus:ring-error/20' : isFocused ? 'border-olive-500' : 'border-sand-300'}
+              ${error ? 'border-error focus:ring-error/20' : isFocused ? 'border-olive-500' : 'border-foreground/20'}
               ${className}
             `}
             {...props}
           />
           {rightIcon && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-sand-500">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/50">
               {rightIcon}
             </div>
           )}
@@ -97,7 +97,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               initial="initial"
               animate="animate"
               exit="exit"
-              className="mt-1.5 text-sm text-sand-500"
+              className="mt-1.5 text-sm text-foreground/60"
             >
               {helperText}
             </motion.p>

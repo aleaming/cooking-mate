@@ -68,23 +68,23 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
             exit="exit"
             className={`
               relative w-full ${sizeStyles[size]}
-              bg-white rounded-2xl shadow-2xl
+              bg-card rounded-2xl shadow-2xl
               max-h-[90vh] overflow-hidden
             `}
           >
             {/* Header */}
             {title && (
-              <div className="flex items-center justify-between p-4 border-b border-sand-200">
-                <h2 className="font-display text-lg font-semibold text-olive-900">
+              <div className="flex items-center justify-between p-4 border-b border-foreground/10">
+                <h2 className="font-display text-lg font-semibold text-card-foreground">
                   {title}
                 </h2>
                 <button
                   onClick={onClose}
-                  className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl hover:bg-sand-100 active:bg-sand-200 transition-colors -mr-2"
+                  className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl hover:bg-foreground/5 active:bg-foreground/10 transition-colors -mr-2"
                   aria-label="Close modal"
                 >
                   <svg
-                    className="w-5 h-5 text-sand-500"
+                    className="w-5 h-5 text-foreground/50"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"

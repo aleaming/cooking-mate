@@ -59,12 +59,150 @@
   --success: #22c55e;
   --warning: #f59e0b;
   --error: #ef4444;
+
+  /* Card surfaces */
+  --card: #ffffff;
+  --card-foreground: #3d432e;
+}
+
+/* Dark mode - System preference (when no explicit user choice) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    /* Background & Foreground */
+    --background: #3d432e;
+    --foreground: #f5f3ef;
+
+    /* Card surfaces */
+    --card: #474f34;
+    --card-foreground: #f5f3ef;
+
+    /* Primary - Olive (adjusted for dark mode) */
+    --olive-50: #2a2d22;
+    --olive-100: #3d432e;
+    --olive-200: #474f34;
+    --olive-300: #56603d;
+    --olive-400: #6f7b4d;
+    --olive-500: #8a9962;
+    --olive-600: #a7b283;
+    --olive-700: #c4ccaa;
+    --olive-800: #dde2cd;
+    --olive-900: #eef0e6;
+
+    /* Secondary - Terracotta (adjusted for dark mode) */
+    --terracotta-50: #4a2a1f;
+    --terracotta-100: #5e3425;
+    --terracotta-200: #6e3525;
+    --terracotta-300: #863c28;
+    --terracotta-400: #a4472b;
+    --terracotta-500: #d97046;
+    --terracotta-600: #e6916f;
+    --terracotta-700: #f0b8a1;
+    --terracotta-800: #f7d5c7;
+    --terracotta-900: #fbeae3;
+
+    /* Accent - Aegean (adjusted for dark mode) */
+    --aegean-50: #0b3350;
+    --aegean-100: #0b4770;
+    --aegean-200: #065688;
+    --aegean-300: #0166a5;
+    --aegean-400: #0080cc;
+    --aegean-500: #0c9feb;
+    --aegean-600: #36bafa;
+    --aegean-700: #7cd1fd;
+    --aegean-800: #b9e5fe;
+    --aegean-900: #e0f2fe;
+
+    /* Neutral - Sand (adjusted for dark mode) */
+    --sand-50: #3a3530;
+    --sand-100: #4a4540;
+    --sand-200: #594f45;
+    --sand-300: #6c5f52;
+    --sand-400: #837361;
+    --sand-500: #9d8b74;
+    --sand-600: #b0a28d;
+    --sand-700: #c4b9a7;
+    --sand-800: #d9d2c5;
+    --sand-900: #e8e4dc;
+
+    /* Semantic - slightly adjusted for dark backgrounds */
+    --success: #4ade80;
+    --warning: #fbbf24;
+    --error: #f87171;
+  }
+}
+
+/* Dark mode - Explicit user choice */
+[data-theme="dark"] {
+  /* Background & Foreground */
+  --background: #3d432e;
+  --foreground: #f5f3ef;
+
+  /* Card surfaces */
+  --card: #474f34;
+  --card-foreground: #f5f3ef;
+
+  /* Primary - Olive (adjusted for dark mode) */
+  --olive-50: #2a2d22;
+  --olive-100: #3d432e;
+  --olive-200: #474f34;
+  --olive-300: #56603d;
+  --olive-400: #6f7b4d;
+  --olive-500: #8a9962;
+  --olive-600: #a7b283;
+  --olive-700: #c4ccaa;
+  --olive-800: #dde2cd;
+  --olive-900: #eef0e6;
+
+  /* Secondary - Terracotta (adjusted for dark mode) */
+  --terracotta-50: #4a2a1f;
+  --terracotta-100: #5e3425;
+  --terracotta-200: #6e3525;
+  --terracotta-300: #863c28;
+  --terracotta-400: #a4472b;
+  --terracotta-500: #d97046;
+  --terracotta-600: #e6916f;
+  --terracotta-700: #f0b8a1;
+  --terracotta-800: #f7d5c7;
+  --terracotta-900: #fbeae3;
+
+  /* Accent - Aegean (adjusted for dark mode) */
+  --aegean-50: #0b3350;
+  --aegean-100: #0b4770;
+  --aegean-200: #065688;
+  --aegean-300: #0166a5;
+  --aegean-400: #0080cc;
+  --aegean-500: #0c9feb;
+  --aegean-600: #36bafa;
+  --aegean-700: #7cd1fd;
+  --aegean-800: #b9e5fe;
+  --aegean-900: #e0f2fe;
+
+  /* Neutral - Sand (adjusted for dark mode) */
+  --sand-50: #3a3530;
+  --sand-100: #4a4540;
+  --sand-200: #594f45;
+  --sand-300: #6c5f52;
+  --sand-400: #837361;
+  --sand-500: #9d8b74;
+  --sand-600: #b0a28d;
+  --sand-700: #c4b9a7;
+  --sand-800: #d9d2c5;
+  --sand-900: #e8e4dc;
+
+  /* Semantic - slightly adjusted for dark backgrounds */
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --error: #f87171;
 }
 
 @theme inline {
   /* Base colors */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  /* Card surfaces */
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
 
   /* Olive palette */
   --color-olive-50: var(--olive-50);

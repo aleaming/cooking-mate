@@ -18,3 +18,6 @@ export { Modal } from './Modal';
 export { Drawer } from './Drawer';
 
 export { Checkbox } from './Checkbox';
+
+export { Toggle } from './Toggle';
+export type { ToggleProps, ToggleSize } from './Toggle';

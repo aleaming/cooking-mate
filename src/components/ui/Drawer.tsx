@@ -69,7 +69,7 @@ export function Drawer({ isOpen, onClose, title, children, height = '75%' }: Dra
             exit="exit"
             className={`
               relative w-full ${heightStyles[height]}
-              bg-white rounded-t-3xl shadow-2xl
+              bg-card rounded-t-3xl shadow-2xl
               flex flex-col overflow-hidden
             `}
           >
@@ -79,22 +79,22 @@ export function Drawer({ isOpen, onClose, title, children, height = '75%' }: Dra
               className="flex justify-center w-full py-3 cursor-grab active:cursor-grabbing"
               aria-label="Close drawer"
             >
-              <div className="w-12 h-1.5 rounded-full bg-sand-300" />
+              <div className="w-12 h-1.5 rounded-full bg-foreground/20" />
             </button>
 
             {/* Header */}
             {title && (
-              <div className="flex items-center justify-between px-6 pb-4 border-b border-sand-200">
-                <h2 className="font-display text-xl font-semibold text-olive-900">
+              <div className="flex items-center justify-between px-6 pb-4 border-b border-foreground/10">
+                <h2 className="font-display text-xl font-semibold text-card-foreground">
                   {title}
                 </h2>
                 <button
                   onClick={onClose}
-                  className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl hover:bg-sand-100 active:bg-sand-200 transition-colors -mr-2"
+                  className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl hover:bg-foreground/5 active:bg-foreground/10 transition-colors -mr-2"
                   aria-label="Close drawer"
                 >
                   <svg
-                    className="w-5 h-5 text-sand-500"
+                    className="w-5 h-5 text-foreground/50"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
