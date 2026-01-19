@@ -39,6 +39,10 @@ export default function SettingsPage() {
     period: null,
     currentPeriodEnd: null,
     cancelAtPeriodEnd: false,
+    trialStartedAt: null,
+    trialEndsAt: null,
+    trialDaysRemaining: null,
+    isInTrial: false,
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -91,12 +95,23 @@ export default function SettingsPage() {
       }));
       // Set subscription info from profile (fields may not exist yet)
       const profileAny = data as unknown as Record<string, unknown>;
+      const status = (profileAny.subscription_status as SubscriptionInfo['status']) || 'inactive';
+      const trialEndsAt = (profileAny.trial_ends_at as string) || null;
+      const trialDaysRemaining = trialEndsAt
+        ? Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+        : null;
+      const isInTrial = status === 'trialing' && !!trialEndsAt && new Date(trialEndsAt) > new Date();
+
       setSubscription({
-        status: (profileAny.subscription_status as SubscriptionInfo['status']) || 'inactive',
+        status,
         tier: (profileAny.subscription_tier as SubscriptionInfo['tier']) || null,
         period: (profileAny.subscription_period as SubscriptionInfo['period']) || null,
         currentPeriodEnd: (profileAny.subscription_current_period_end as string) || null,
         cancelAtPeriodEnd: (profileAny.subscription_cancel_at_period_end as boolean) || false,
+        trialStartedAt: (profileAny.trial_started_at as string) || null,
+        trialEndsAt,
+        trialDaysRemaining,
+        isInTrial,
       });
     }
     setIsLoading(false);

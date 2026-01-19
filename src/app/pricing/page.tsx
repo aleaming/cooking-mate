@@ -1,17 +1,20 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { IconAlertTriangle } from '@tabler/icons-react';
 import { useAuth } from '@/providers/AuthProvider';
 import { PricingCard } from '@/components/subscription';
 import { Button } from '@/components/ui';
 import { PLANS, getYearlySavingsPercent, type PlanTier, type PlanPeriod } from '@/lib/stripe/config';
 import { pageVariants, staggerContainer, staggerItem } from '@/lib/constants/animations';
 
-export default function PricingPage() {
+function PricingPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
+  const trialExpired = searchParams.get('trial') === 'expired';
   const [period, setPeriod] = useState<PlanPeriod>('monthly');
   const [loadingTier, setLoadingTier] = useState<PlanTier | null>(null);
 
@@ -58,6 +61,25 @@ export default function PricingPage() {
       exit="exit"
       className="min-h-screen"
     >
+      {/* Trial Expired Banner */}
+      {trialExpired && (
+        <div className="bg-terracotta-50 border-b border-terracotta-200">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center justify-center gap-3 text-center">
+              <IconAlertTriangle size={24} className="text-terracotta-500 flex-shrink-0" />
+              <div>
+                <p className="text-terracotta-800 font-medium">
+                  Your free trial has ended
+                </p>
+                <p className="text-terracotta-600 text-sm">
+                  Subscribe now to continue using all features
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header Section */}
       <div className="bg-gradient-to-br from-olive-50 to-sand-50 py-16 lg:py-24">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -188,13 +210,22 @@ export default function PricingPage() {
                 Is there a free trial?
               </h3>
               <p className="text-sand-600">
-                We don&apos;t offer a free trial at this time, but you can cancel
-                within the first 14 days for a full refund if you&apos;re not satisfied.
+                Yes! When you sign up, you get a 14-day free trial with full access
+                to all features. No credit card required to start. Subscribe anytime
+                before your trial ends to continue using MedDiet.
               </p>
             </div>
           </div>
         </div>
       </div>
     </motion.div>
+  );
+}
+
+export default function PricingPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-sand-50" />}>
+      <PricingPageContent />
+    </Suspense>
   );
 }

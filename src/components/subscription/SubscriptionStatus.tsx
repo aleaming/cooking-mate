@@ -73,7 +73,22 @@ export function SubscriptionStatus({ subscription }: SubscriptionStatusProps) {
           </div>
         </div>
 
-        {plan && subscription.status !== 'inactive' && (
+        {/* Trial info display */}
+        {subscription.isInTrial && subscription.trialEndsAt && (
+          <div className="p-3 bg-aegean-50 rounded-lg mb-4 border border-aegean-200">
+            <p className="text-sm text-aegean-700">
+              <span className="font-semibold">
+                {subscription.trialDaysRemaining} {subscription.trialDaysRemaining === 1 ? 'day' : 'days'} remaining
+              </span>
+              {' '}in your free trial
+            </p>
+            <p className="text-xs text-aegean-600 mt-1">
+              Trial ends {format(new Date(subscription.trialEndsAt), 'MMMM d, yyyy')}
+            </p>
+          </div>
+        )}
+
+        {plan && subscription.status !== 'inactive' && subscription.status !== 'trialing' && (
           <div className="space-y-2 mb-4">
             <p className="text-sand-700">
               <span className="font-medium">{plan.name}</span>

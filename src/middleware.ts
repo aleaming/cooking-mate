@@ -107,17 +107,25 @@ export async function middleware(request: NextRequest) {
   // Check subscription status for all other protected routes
   const { data: profile } = await supabase
     .from('profiles')
-    .select('subscription_status')
+    .select('subscription_status, trial_ends_at')
     .eq('id', user.id)
     .single();
 
+  // Check if user has active access (active subscription or active trial)
   const hasActiveSubscription =
     profile?.subscription_status === 'active' ||
-    profile?.subscription_status === 'trialing';
+    (profile?.subscription_status === 'trialing' &&
+      profile?.trial_ends_at &&
+      new Date(profile.trial_ends_at) > new Date());
 
   if (!hasActiveSubscription) {
     // Redirect to pricing page if no active subscription
-    return NextResponse.redirect(new URL('/pricing', request.url));
+    const pricingUrl = new URL('/pricing', request.url);
+    // Add message for expired trial
+    if (profile?.subscription_status === 'trialing') {
+      pricingUrl.searchParams.set('trial', 'expired');
+    }
+    return NextResponse.redirect(pricingUrl);
   }
 
   return supabaseResponse;
