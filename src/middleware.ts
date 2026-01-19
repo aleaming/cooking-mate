@@ -10,10 +10,21 @@ const PUBLIC_ROUTES = [
   '/reset-password',
   '/auth-error',
   '/auth/callback',
+  '/pricing', // Pricing page is public
 ];
 
 // Auth routes where logged-in users should be redirected away
 const AUTH_ROUTES = ['/login', '/signup'];
+
+// Routes that require auth but NOT subscription (for checkout flow)
+const FREE_ROUTES = [
+  '/pricing',
+  '/api/stripe/checkout',
+  '/api/stripe/portal',
+];
+
+// Webhook routes that bypass auth entirely (use signature verification)
+const WEBHOOK_ROUTES = ['/api/stripe/webhook'];
 
 function isPublicRoute(pathname: string): boolean {
   return PUBLIC_ROUTES.some(
@@ -25,7 +36,24 @@ function isAuthRoute(pathname: string): boolean {
   return AUTH_ROUTES.includes(pathname);
 }
 
+function isFreeRoute(pathname: string): boolean {
+  return FREE_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`)
+  );
+}
+
+function isWebhookRoute(pathname: string): boolean {
+  return WEBHOOK_ROUTES.includes(pathname);
+}
+
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Skip webhook routes entirely (they use signature verification)
+  if (isWebhookRoute(pathname)) {
+    return NextResponse.next({ request });
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -55,8 +83,6 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { pathname } = request.nextUrl;
-
   // Allow public routes
   if (isPublicRoute(pathname)) {
     // If logged in and trying to access auth pages, redirect to calendar
@@ -71,6 +97,27 @@ export async function middleware(request: NextRequest) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('returnUrl', pathname);
     return NextResponse.redirect(loginUrl);
+  }
+
+  // Allow free routes for authenticated users (checkout flow, etc.)
+  if (isFreeRoute(pathname)) {
+    return supabaseResponse;
+  }
+
+  // Check subscription status for all other protected routes
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('subscription_status')
+    .eq('id', user.id)
+    .single();
+
+  const hasActiveSubscription =
+    profile?.subscription_status === 'active' ||
+    profile?.subscription_status === 'trialing';
+
+  if (!hasActiveSubscription) {
+    // Redirect to pricing page if no active subscription
+    return NextResponse.redirect(new URL('/pricing', request.url));
   }
 
   return supabaseResponse;

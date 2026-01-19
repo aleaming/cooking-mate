@@ -1,7 +1,10 @@
 'use client';
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { Suspense, useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { startOfMonth, endOfMonth, format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
+import { IconCheck, IconX } from '@tabler/icons-react';
 import {
   DndContext,
   DragOverlay,
@@ -22,13 +25,54 @@ import { getUserRecipes } from '@/lib/actions/userRecipes';
 import { Recipe, MealSlotType } from '@/types';
 import { pageVariants } from '@/lib/constants/animations';
 
-export default function CalendarPage() {
-  const { addMeal } = useMealPlanStore();
+function CalendarPageContent() {
+  const { addMeal, fetchMeals, currentYear, currentMonth } = useMealPlanStore();
   const { user, isLoading: authLoading } = useAuth();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [activeRecipe, setActiveRecipe] = useState<Recipe | null>(null);
   const [activeDropId, setActiveDropId] = useState<string | null>(null);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [userRecipes, setUserRecipes] = useState<Recipe[]>([]);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const hasFetchedRef = useRef<string | null>(null);
+
+  // Handle subscription success query parameter
+  useEffect(() => {
+    if (searchParams.get('subscription') === 'success') {
+      setShowSuccessToast(true);
+      // Clear the query param from URL
+      router.replace('/calendar', { scroll: false });
+      // Auto-hide after 5 seconds
+      const timer = setTimeout(() => setShowSuccessToast(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams, router]);
+
+  // Fetch meal plans from Supabase when user is authenticated and month changes
+  useEffect(() => {
+    // Don't fetch until auth state is determined
+    if (authLoading) return;
+
+    // Don't fetch if not logged in
+    if (!user) return;
+
+    // Create a key to track what we've fetched
+    const fetchKey = `${currentYear}-${currentMonth}-${user.id}`;
+
+    // Don't re-fetch if we already fetched for this month/user combo
+    if (hasFetchedRef.current === fetchKey) return;
+
+    const startDate = startOfMonth(new Date(currentYear, currentMonth));
+    const endDate = endOfMonth(new Date(currentYear, currentMonth));
+
+    fetchMeals(
+      format(startDate, 'yyyy-MM-dd'),
+      format(endDate, 'yyyy-MM-dd')
+    );
+
+    hasFetchedRef.current = fetchKey;
+  }, [user, authLoading, currentYear, currentMonth, fetchMeals]);
 
   // Fetch user recipes when logged in (wait for auth to finish loading first)
   useEffect(() => {
@@ -122,6 +166,33 @@ export default function CalendarPage() {
       exit="exit"
       className="min-h-[calc(100vh-64px)] flex flex-col lg:flex-row"
     >
+      {/* Subscription Success Toast */}
+      <AnimatePresence>
+        {showSuccessToast && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-50
+                       bg-olive-500 text-white px-6 py-4 rounded-2xl
+                       shadow-lg shadow-olive-500/30 flex items-center gap-3"
+          >
+            <IconCheck size={24} />
+            <div>
+              <p className="font-semibold">Welcome to MedDiet!</p>
+              <p className="text-sm text-olive-100">Your subscription is now active.</p>
+            </div>
+            <button
+              onClick={() => setShowSuccessToast(false)}
+              className="ml-2 p-1 hover:bg-olive-600 rounded-lg transition-colors"
+              aria-label="Dismiss"
+            >
+              <IconX size={18} />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -271,5 +342,13 @@ export default function CalendarPage() {
         </DragOverlay>
       </DndContext>
     </motion.div>
+  );
+}
+
+export default function CalendarPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-sand-50" />}>
+      <CalendarPageContent />
+    </Suspense>
   );
 }
