@@ -55,7 +55,7 @@ Skeleton.displayName = 'Skeleton';
 
 // Skeleton Card for recipe loading states
 const SkeletonCard = () => (
-  <div className="bg-white rounded-2xl shadow-lg shadow-sand-200/50 overflow-hidden">
+  <div className="bg-card rounded-2xl shadow-lg shadow-sand-200/50 dark:shadow-sand-900/20 overflow-hidden">
     <Skeleton variant="rectangular" className="w-full aspect-video" />
     <div className="p-4 space-y-3">
       <Skeleton variant="text" className="w-3/4 h-6" />

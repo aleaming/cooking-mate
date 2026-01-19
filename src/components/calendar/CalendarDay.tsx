@@ -23,8 +23,8 @@ export function CalendarDay({ day, activeDropId }: CalendarDayProps) {
     <motion.div
       variants={staggerItem}
       className={`
-        min-h-[140px] p-2 border-b border-r border-sand-200
-        ${day.isCurrentMonth ? 'bg-white' : 'bg-sand-50/50'}
+        min-h-[140px] p-2 border-b border-r border-sand-200 dark:border-sand-700
+        ${day.isCurrentMonth ? 'bg-card' : 'bg-muted/50'}
         ${day.isToday ? 'ring-2 ring-inset ring-olive-500' : ''}
       `}
     >

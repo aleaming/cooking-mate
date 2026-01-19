@@ -26,7 +26,7 @@ export function NextIngredientSuggestions({
   }
 
   return (
-    <div className="bg-white rounded-xl p-4 shadow-sm border border-sand-100">
+    <div className="bg-card rounded-xl p-4 shadow-sm border border-sand-100 dark:border-sand-700">
       <h3 className="font-display font-semibold text-olive-900 mb-3">
         What to Buy Next
       </h3>
@@ -44,7 +44,7 @@ export function NextIngredientSuggestions({
           <motion.div
             key={suggestion.ingredient.id}
             variants={staggerItem}
-            className="flex items-center justify-between p-2 rounded-lg bg-sand-50 hover:bg-olive-50 transition-colors"
+            className="flex items-center justify-between p-2 rounded-lg bg-muted hover:bg-olive-50 dark:hover:bg-olive-900/30 transition-colors"
           >
             <div className="flex-1 min-w-0">
               <p className="font-medium text-olive-800 truncate">

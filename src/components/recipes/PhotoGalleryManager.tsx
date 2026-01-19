@@ -195,7 +195,7 @@ export function PhotoGalleryManager({
                     {!photo.isPrimary && (
                       <button
                         onClick={(e) => handleSetPrimary(photo.id, e)}
-                        className="p-1.5 bg-white rounded-full shadow hover:bg-sand-50 transition-colors"
+                        className="p-1.5 bg-card rounded-full shadow hover:bg-sand-50 dark:hover:bg-sand-700 transition-colors"
                         aria-label="Set as primary photo"
                         title="Set as primary"
                       >
@@ -204,7 +204,7 @@ export function PhotoGalleryManager({
                     )}
                     <button
                       onClick={(e) => handleRemove(photo.id, e)}
-                      className="p-1.5 bg-white rounded-full shadow hover:bg-error/10 transition-colors"
+                      className="p-1.5 bg-card rounded-full shadow hover:bg-error/10 transition-colors"
                       aria-label="Remove photo"
                       title="Remove"
                     >

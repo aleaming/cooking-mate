@@ -79,7 +79,7 @@ export function IngredientSearch({
           onKeyDown={handleKeyDown}
           onFocus={() => query.length >= 1 && results.length > 0 && setIsOpen(true)}
           placeholder={placeholder}
-          className="w-full px-4 py-3 pl-11 text-lg rounded-xl border border-sand-200 focus:border-olive-400 focus:ring-2 focus:ring-olive-100 outline-none transition-colors bg-white text-olive-800 placeholder:text-sand-400"
+          className="w-full px-4 py-3 pl-11 text-lg rounded-xl border border-sand-200 dark:border-sand-700 focus:border-olive-400 focus:ring-2 focus:ring-olive-100 dark:focus:ring-olive-900/30 outline-none transition-colors bg-card text-olive-800 placeholder:text-sand-400"
         />
         <svg
           className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-sand-400"
@@ -103,7 +103,7 @@ export function IngredientSearch({
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="absolute z-50 w-full mt-2 bg-white rounded-xl shadow-lg border border-sand-200 overflow-hidden"
+            className="absolute z-50 w-full mt-2 bg-card rounded-xl shadow-lg border border-sand-200 dark:border-sand-700 overflow-hidden"
           >
             {results.map((ingredient, index) => (
               <button
@@ -112,8 +112,8 @@ export function IngredientSearch({
                 onMouseEnter={() => setHighlightedIndex(index)}
                 className={`
                   w-full px-4 py-3 text-left flex items-center justify-between
-                  ${index === highlightedIndex ? 'bg-olive-50' : 'hover:bg-sand-50'}
-                  ${index !== results.length - 1 ? 'border-b border-sand-100' : ''}
+                  ${index === highlightedIndex ? 'bg-olive-50 dark:bg-olive-900/30' : 'hover:bg-sand-50 dark:hover:bg-sand-800'}
+                  ${index !== results.length - 1 ? 'border-b border-sand-100 dark:border-sand-700' : ''}
                 `}
               >
                 <span className="text-olive-800">{ingredient.name}</span>

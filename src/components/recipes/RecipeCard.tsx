@@ -32,7 +32,7 @@ const RecipeCard = forwardRef<HTMLDivElement, RecipeCardProps>(
         whileTap="tap"
         transition={SPRING.gentle}
         className={`
-          group bg-white rounded-2xl overflow-hidden
+          group bg-card rounded-2xl overflow-hidden
           shadow-lg shadow-sand-200/50
           cursor-pointer
           ${compact ? '' : 'h-full'}
@@ -59,7 +59,7 @@ const RecipeCard = forwardRef<HTMLDivElement, RecipeCardProps>(
 
           {/* Time Badge */}
           <div className="absolute bottom-2 left-2">
-            <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-white/90 backdrop-blur-sm rounded-lg text-olive-800">
+            <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-card/90 backdrop-blur-sm rounded-lg text-olive-800">
               <ClockIcon className="w-3.5 h-3.5" />
               {recipe.totalTimeMinutes} min
             </span>
@@ -93,7 +93,7 @@ const RecipeCard = forwardRef<HTMLDivElement, RecipeCardProps>(
                     e.stopPropagation();
                     onEdit();
                   }}
-                  className="p-2 bg-white rounded-lg shadow hover:bg-sand-50 transition-colors"
+                  className="p-2 bg-card rounded-lg shadow hover:bg-sand-50 dark:hover:bg-sand-700 transition-colors"
                   aria-label="Edit recipe"
                 >
                   <IconEdit className="w-4 h-4 text-foreground" />
@@ -106,7 +106,7 @@ const RecipeCard = forwardRef<HTMLDivElement, RecipeCardProps>(
                     e.stopPropagation();
                     onDelete();
                   }}
-                  className="p-2 bg-white rounded-lg shadow hover:bg-error/10 transition-colors"
+                  className="p-2 bg-card rounded-lg shadow hover:bg-error/10 transition-colors"
                   aria-label="Delete recipe"
                 >
                   <IconTrash className="w-4 h-4 text-error" />

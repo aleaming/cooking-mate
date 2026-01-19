@@ -44,8 +44,8 @@ export function DraggableRecipeCard({ recipe }: DraggableRecipeCardProps) {
       whileHover={{ scale: 1.02 }}
       transition={SPRING.gentle}
       className={`
-        bg-white rounded-xl p-3 cursor-grab active:cursor-grabbing
-        border border-sand-200 hover:border-olive-300
+        bg-card rounded-xl p-3 cursor-grab active:cursor-grabbing
+        border border-sand-200 dark:border-sand-700 hover:border-olive-300
         ${isDragging ? 'z-50' : ''}
       `}
     >

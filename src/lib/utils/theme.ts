@@ -5,15 +5,16 @@ const THEME_STORAGE_KEY = 'theme';
 
 /**
  * Get the stored theme preference from localStorage
+ * Defaults to 'light' if no preference is stored
  */
 export function getStoredTheme(): Theme {
-  if (typeof window === 'undefined') return 'system';
+  if (typeof window === 'undefined') return 'light';
 
   const stored = localStorage.getItem(THEME_STORAGE_KEY);
   if (stored === 'light' || stored === 'dark' || stored === 'system') {
     return stored;
   }
-  return 'system';
+  return 'light';
 }
 
 /**

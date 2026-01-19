@@ -38,12 +38,12 @@ export function ShoppingCategory({ category, checkedItems, onToggleItem }: Shopp
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={SPRING.gentle}
-      className="bg-white rounded-2xl shadow-lg shadow-sand-200/50 overflow-hidden"
+      className="bg-card rounded-2xl shadow-lg shadow-sand-200/50 dark:shadow-sand-900/20 overflow-hidden"
     >
       {/* Category Header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between p-4 hover:bg-sand-50 transition-colors"
+        className="w-full flex items-center justify-between p-4 hover:bg-muted transition-colors"
       >
         <div className="flex items-center gap-3">
           <CategoryIcon category={category.category} />

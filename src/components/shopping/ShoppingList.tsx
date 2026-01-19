@@ -63,7 +63,7 @@ export function ShoppingList({
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-2xl shadow-lg shadow-sand-200/50 p-4"
+        className="bg-card rounded-2xl shadow-lg shadow-sand-200/50 dark:shadow-sand-900/20 p-4"
       >
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-olive-800">

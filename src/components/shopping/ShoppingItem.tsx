@@ -23,7 +23,7 @@ export function ShoppingItem({ item, onToggle }: ShoppingItemProps) {
       className={`
         flex items-center gap-3 p-3 rounded-xl cursor-pointer
         transition-colors duration-200
-        ${item.isChecked ? 'bg-sand-50' : 'bg-white hover:bg-olive-50'}
+        ${item.isChecked ? 'bg-muted' : 'bg-card hover:bg-olive-50 dark:hover:bg-olive-900/20'}
       `}
     >
       {/* Checkbox */}

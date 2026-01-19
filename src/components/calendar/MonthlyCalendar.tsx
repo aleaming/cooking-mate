@@ -30,7 +30,7 @@ export function MonthlyCalendar({ activeDropId }: MonthlyCalendarProps) {
   const weekDays = getWeekDayNames();
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg shadow-sand-200/50 overflow-hidden">
+    <div className="bg-card rounded-2xl shadow-lg shadow-sand-200/50 overflow-hidden">
       {/* Calendar Header */}
       <div className="flex items-center justify-between p-4 border-b border-sand-200">
         <div className="flex items-center gap-2">

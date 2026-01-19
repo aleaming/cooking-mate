@@ -229,7 +229,7 @@ export function AddToMealPlanDrawer({ isOpen, onClose, recipe }: AddToMealPlanDr
 
             {/* Calendar Section */}
             <div className="flex-1 overflow-y-auto px-4 py-4">
-              <div className="bg-white rounded-2xl shadow-lg shadow-sand-200/50 overflow-hidden">
+              <div className="bg-card rounded-2xl shadow-lg shadow-sand-200/50 overflow-hidden">
                 {/* Calendar Header */}
                 <div className="flex items-center justify-between p-4 border-b border-sand-200 bg-sand-50/50">
                   <div className="flex items-center gap-1">
@@ -335,8 +335,8 @@ function CalendarDayCell({ day, recipe, onSelectMeal, getMeal }: CalendarDayCell
     <motion.div
       variants={staggerItem}
       className={`
-        min-h-[100px] p-1.5 border-b border-r border-sand-100
-        ${day.isCurrentMonth ? 'bg-white' : 'bg-sand-50/50'}
+        min-h-[100px] p-1.5 border-b border-r border-sand-100 dark:border-sand-700
+        ${day.isCurrentMonth ? 'bg-card' : 'bg-muted/50'}
         ${day.isToday ? 'ring-2 ring-inset ring-olive-400' : ''}
         ${isPast && !day.isToday ? 'opacity-50' : ''}
       `}

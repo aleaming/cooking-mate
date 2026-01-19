@@ -42,7 +42,7 @@ export function SuggestionCard({
       transition={SPRING.gentle}
       onClick={onClick}
       className={`
-        bg-white rounded-xl shadow-sm border border-sand-100
+        bg-card rounded-xl shadow-sm border border-sand-100 dark:border-sand-700
         overflow-hidden cursor-pointer hover:shadow-md transition-shadow
         ${compact ? 'flex gap-3 p-2' : 'flex flex-col'}
       `}

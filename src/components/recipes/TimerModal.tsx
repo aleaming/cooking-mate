@@ -165,10 +165,10 @@ export function TimerModal({ isOpen, onClose, initialSeconds, label }: TimerModa
             initial="initial"
             animate="animate"
             exit="exit"
-            className="relative w-full max-w-[calc(100%-2rem)] sm:max-w-sm bg-white rounded-2xl shadow-2xl overflow-hidden"
+            className="relative w-full max-w-[calc(100%-2rem)] sm:max-w-sm bg-card rounded-2xl shadow-2xl overflow-hidden"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-sand-200">
+            <div className="flex items-center justify-between p-4 border-b border-sand-200 dark:border-sand-700">
               <h2 className="font-display text-lg font-semibold text-olive-900">Cooking Timer</h2>
               <button
                 onClick={onClose}

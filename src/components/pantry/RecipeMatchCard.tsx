@@ -33,7 +33,7 @@ export function RecipeMatchCard({ match }: RecipeMatchCardProps) {
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         transition={SPRING.gentle}
-        className="bg-white rounded-xl shadow-sm border border-sand-100 overflow-hidden hover:shadow-md transition-shadow"
+        className="bg-card rounded-xl shadow-sm border border-sand-100 dark:border-sand-700 overflow-hidden hover:shadow-md transition-shadow"
       >
         {/* Image */}
         {recipe.imageUrl && (

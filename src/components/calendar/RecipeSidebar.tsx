@@ -49,9 +49,9 @@ export function RecipeSidebar({ recipes }: RecipeSidebarProps) {
   }, [recipes, search, mealFilter]);
 
   return (
-    <div className="h-full flex flex-col bg-sand-50 border-r border-sand-200">
+    <div className="h-full flex flex-col bg-muted border-r border-sand-200 dark:border-sand-700">
       {/* Header */}
-      <div className="p-4 border-b border-sand-200 bg-white">
+      <div className="p-4 border-b border-sand-200 dark:border-sand-700 bg-card">
         <h2 className="font-display text-lg font-semibold text-olive-900 mb-3">
           Recipes
         </h2>
