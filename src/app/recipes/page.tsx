@@ -5,23 +5,36 @@ import { motion } from 'framer-motion';
 import { RecipeCatalog } from '@/components/recipes';
 import { allRecipes } from '@/data/recipes';
 import { getUserRecipes } from '@/lib/actions/userRecipes';
+import { useAuth } from '@/providers/AuthProvider';
 import { pageVariants } from '@/lib/constants/animations';
 import type { Recipe } from '@/types';
 
 export default function RecipesPage() {
+  const { user, isLoading: authLoading } = useAuth();
   const [userRecipes, setUserRecipes] = useState<Recipe[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch user recipes on mount
+  // Fetch user recipes when logged in (wait for auth to finish loading first)
   useEffect(() => {
     async function loadUserRecipes() {
+      // Don't fetch until auth state is determined
+      if (authLoading) return;
+
+      // Not logged in - no user recipes to fetch
+      if (!user) {
+        setUserRecipes([]);
+        setIsLoading(false);
+        return;
+      }
+
       try {
         const result = await getUserRecipes();
-        if (result.data) {
+        if (result.error) {
+          console.error('Failed to load user recipes:', result.error);
+        } else if (result.data) {
           setUserRecipes(result.data);
         }
       } catch (error) {
-        // Silently fail - user might not be logged in
         console.error('Failed to load user recipes:', error);
       } finally {
         setIsLoading(false);
@@ -29,7 +42,7 @@ export default function RecipesPage() {
     }
 
     loadUserRecipes();
-  }, []);
+  }, [user, authLoading]);
 
   // Combine static and user recipes
   const allCombinedRecipes = useMemo(() => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   DndContext,
@@ -17,14 +17,48 @@ import {
 import { MonthlyCalendar, RecipeSidebar, DraggableRecipeCard } from '@/components/calendar';
 import { allRecipes } from '@/data/recipes';
 import { useMealPlanStore } from '@/stores/useMealPlanStore';
+import { useAuth } from '@/providers/AuthProvider';
+import { getUserRecipes } from '@/lib/actions/userRecipes';
 import { Recipe, MealSlotType } from '@/types';
 import { pageVariants } from '@/lib/constants/animations';
 
 export default function CalendarPage() {
   const { addMeal } = useMealPlanStore();
+  const { user, isLoading: authLoading } = useAuth();
   const [activeRecipe, setActiveRecipe] = useState<Recipe | null>(null);
   const [activeDropId, setActiveDropId] = useState<string | null>(null);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+  const [userRecipes, setUserRecipes] = useState<Recipe[]>([]);
+
+  // Fetch user recipes when logged in (wait for auth to finish loading first)
+  useEffect(() => {
+    async function fetchUserRecipes() {
+      // Don't fetch until auth state is determined
+      if (authLoading) return;
+
+      if (!user) {
+        setUserRecipes([]);
+        return;
+      }
+
+      const { data, error } = await getUserRecipes();
+      if (error) {
+        console.error('Failed to fetch user recipes:', error);
+        return;
+      }
+      if (data) {
+        // Convert UserRecipe to Recipe type (they're compatible)
+        setUserRecipes(data as Recipe[]);
+      }
+    }
+
+    fetchUserRecipes();
+  }, [user, authLoading]);
+
+  // Combine static recipes with user recipes
+  const combinedRecipes = useMemo(() => {
+    return [...allRecipes, ...userRecipes];
+  }, [userRecipes]);
 
   // Configure sensors with touch-friendly activation constraints
   const pointerSensor = useSensor(PointerSensor, {
@@ -97,7 +131,7 @@ export default function CalendarPage() {
       >
         {/* Desktop Recipe Sidebar - hidden on mobile */}
         <div className="hidden lg:block w-72 flex-shrink-0 h-[calc(100vh-64px)] sticky top-16">
-          <RecipeSidebar recipes={allRecipes} />
+          <RecipeSidebar recipes={combinedRecipes} />
         </div>
 
         {/* Calendar Area */}
@@ -220,7 +254,7 @@ export default function CalendarPage() {
 
                 {/* Recipe List */}
                 <div className="flex-1 overflow-hidden h-[calc(80vh-120px)]">
-                  <RecipeSidebar recipes={allRecipes} />
+                  <RecipeSidebar recipes={combinedRecipes} />
                 </div>
               </motion.div>
             </>
