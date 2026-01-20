@@ -26,6 +26,7 @@ export interface PasswordRequirements {
 
 export type AuthErrorCode =
   | 'invalid_credentials'
+  | 'email_not_confirmed'
   | 'email_taken'
   | 'weak_password'
   | 'passwords_mismatch'
@@ -43,6 +44,8 @@ export interface AuthError {
 // Map error codes to user-friendly messages
 export const AUTH_ERROR_MESSAGES: Record<AuthErrorCode, string> = {
   invalid_credentials: 'Invalid email or password',
+  email_not_confirmed:
+    'Please confirm your email address. Check your inbox for a confirmation link.',
   email_taken: 'An account with this email already exists',
   weak_password: 'Password does not meet requirements',
   passwords_mismatch: 'Passwords do not match',

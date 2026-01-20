@@ -18,16 +18,21 @@ import {
   DragOverEvent,
 } from '@dnd-kit/core';
 import { MonthlyCalendar, RecipeSidebar, DraggableRecipeCard } from '@/components/calendar';
+import { WelcomeModal } from '@/components/onboarding';
 import { allRecipes } from '@/data/recipes';
 import { useMealPlanStore } from '@/stores/useMealPlanStore';
+import { useOnboardingStore } from '@/stores/useOnboardingStore';
 import { useAuth } from '@/providers/AuthProvider';
 import { getUserRecipes } from '@/lib/actions/userRecipes';
+import { getSupabaseClient } from '@/lib/supabase/client';
 import { Recipe, MealSlotType } from '@/types';
 import { pageVariants } from '@/lib/constants/animations';
+import type { SubscriptionTier, SubscriptionStatus } from '@/types/subscription';
 
 function CalendarPageContent() {
   const { addMeal, fetchMeals, currentYear, currentMonth } = useMealPlanStore();
   const { user, isLoading: authLoading } = useAuth();
+  const hasSeenWelcome = useOnboardingStore((state) => state.hasSeenWelcome);
   const searchParams = useSearchParams();
   const router = useRouter();
   const [activeRecipe, setActiveRecipe] = useState<Recipe | null>(null);
@@ -35,6 +40,8 @@ function CalendarPageContent() {
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [userRecipes, setUserRecipes] = useState<Recipe[]>([]);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [subscriptionTier, setSubscriptionTier] = useState<SubscriptionTier | null>(null);
   const hasFetchedRef = useRef<string | null>(null);
 
   // Handle subscription success query parameter
@@ -48,6 +55,33 @@ function CalendarPageContent() {
       return () => clearTimeout(timer);
     }
   }, [searchParams, router]);
+
+  // Check subscription status and show welcome modal for new subscribers
+  useEffect(() => {
+    if (authLoading || !user || hasSeenWelcome) return;
+
+    async function checkSubscription() {
+      const supabase = getSupabaseClient();
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('subscription_status, subscription_tier')
+        .eq('id', user!.id)
+        .single();
+
+      if (profile) {
+        const status = profile.subscription_status as SubscriptionStatus;
+        const tier = profile.subscription_tier as SubscriptionTier | null;
+
+        // Show welcome modal for users with active subscription who haven't seen it
+        if ((status === 'active' || status === 'trialing') && tier && !hasSeenWelcome) {
+          setSubscriptionTier(tier);
+          setShowWelcomeModal(true);
+        }
+      }
+    }
+
+    checkSubscription();
+  }, [user, authLoading, hasSeenWelcome]);
 
   // Fetch meal plans from Supabase when user is authenticated and month changes
   useEffect(() => {
@@ -341,6 +375,15 @@ function CalendarPageContent() {
           )}
         </DragOverlay>
       </DndContext>
+
+      {/* Welcome Modal for new subscribers */}
+      {subscriptionTier && (
+        <WelcomeModal
+          isOpen={showWelcomeModal}
+          onClose={() => setShowWelcomeModal(false)}
+          tier={subscriptionTier}
+        />
+      )}
     </motion.div>
   );
 }

@@ -29,6 +29,7 @@ function LoginForm() {
   const successMessage = resetSuccess
     ? 'Password reset successfully. Please sign in with your new password.'
     : null;
+  const isEmailNotConfirmed = errorCode === 'email_not_confirmed';
 
   return (
     <AuthForm
@@ -102,6 +103,17 @@ function LoginForm() {
             {isPending ? 'Signing in...' : 'Sign in'}
           </Button>
         </motion.div>
+
+        {isEmailNotConfirmed && (
+          <motion.div variants={staggerItem} className="text-center pt-2">
+            <Link
+              href="/confirm-email"
+              className="text-sm text-aegean-600 hover:text-aegean-700 hover:underline"
+            >
+              Resend confirmation email
+            </Link>
+          </motion.div>
+        )}
       </motion.form>
     </AuthForm>
   );
