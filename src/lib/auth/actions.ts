@@ -28,7 +28,11 @@ export async function login(formData: FormData) {
   });
 
   if (error) {
-    // Always show generic error for security
+    // Check for unconfirmed email error from Supabase
+    if (error.message.toLowerCase().includes('email not confirmed')) {
+      redirectWithError('/login', 'email_not_confirmed');
+    }
+    // Always show generic error for security for other errors
     redirectWithError('/login', 'invalid_credentials');
   }
 
@@ -61,13 +65,14 @@ export async function signup(formData: FormData) {
   }
 
   const supabase = await createServerSupabaseClient();
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
   const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      // No email confirmation required - user gets immediate access
-      emailRedirectTo: undefined,
+      // Enable email confirmation - redirect to auth callback after confirming
+      emailRedirectTo: `${siteUrl}/auth/callback`,
     },
   });
 
@@ -79,9 +84,8 @@ export async function signup(formData: FormData) {
     redirectWithError('/signup', 'signup_failed');
   }
 
-  revalidatePath('/', 'layout');
-  // Redirect new users to pricing page to start their trial or subscribe
-  redirect('/pricing');
+  // Redirect to confirmation pending page
+  redirect('/confirm-email');
 }
 
 export async function forgotPassword(formData: FormData) {
@@ -143,4 +147,29 @@ export async function logout() {
 
   revalidatePath('/', 'layout');
   redirect('/');
+}
+
+export async function resendConfirmation(formData: FormData) {
+  const email = formData.get('email') as string;
+
+  if (!email) {
+    redirectWithError('/confirm-email', 'invalid_email');
+  }
+
+  const supabase = await createServerSupabaseClient();
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+
+  const { error } = await supabase.auth.resend({
+    type: 'signup',
+    email,
+    options: {
+      emailRedirectTo: `${siteUrl}/auth/callback`,
+    },
+  });
+
+  if (error) {
+    redirectWithError('/confirm-email', 'send_failed');
+  }
+
+  redirect('/confirm-email?sent=true');
 }

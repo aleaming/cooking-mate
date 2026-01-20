@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
-import { getPriceId, type PlanTier, type PlanPeriod } from '@/lib/stripe/config';
+import {
+  getPriceId,
+  validateStripeConfig,
+  type PlanTier,
+  type PlanPeriod,
+} from '@/lib/stripe/config';
 
 export async function POST(request: NextRequest) {
   try {
@@ -59,12 +64,28 @@ export async function POST(request: NextRequest) {
         .eq('id', user.id);
     }
 
+    // Validate Stripe configuration
+    const configValidation = validateStripeConfig();
+    if (!configValidation.valid) {
+      console.error('Missing Stripe price IDs:', configValidation.missing);
+      return NextResponse.json(
+        {
+          error: `Stripe configuration incomplete. Missing: ${configValidation.missing.join(', ')}`,
+        },
+        { status: 500 }
+      );
+    }
+
     // Get the price ID
     const priceId = getPriceId(tier, period);
 
-    if (!priceId) {
+    // Check for empty string as well as null/undefined
+    if (!priceId || priceId.trim() === '') {
+      console.error(`Missing Stripe price ID for ${tier} ${period}`);
       return NextResponse.json(
-        { error: 'Price not configured' },
+        {
+          error: `Price not configured for ${tier} ${period}. Please check environment variables.`,
+        },
         { status: 500 }
       );
     }
@@ -97,7 +118,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ url: session.url });
   } catch (error) {
-    console.error('Checkout error:', error);
+    console.error('Checkout error details:', {
+      error,
+      message: error instanceof Error ? error.message : 'Unknown error',
+    });
     return NextResponse.json(
       { error: 'Failed to create checkout session' },
       { status: 500 }

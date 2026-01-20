@@ -69,3 +69,16 @@ export function getYearlySavingsPercent(tier: PlanTier): number {
   const yearly = PLANS[tier].prices.yearly.amount;
   return Math.round(((monthly - yearly) / monthly) * 100);
 }
+
+export function validateStripeConfig(): { valid: boolean; missing: string[] } {
+  const required = [
+    { key: 'STRIPE_PRICE_BASIC_MONTHLY', value: PLANS.basic.prices.monthly.id },
+    { key: 'STRIPE_PRICE_BASIC_YEARLY', value: PLANS.basic.prices.yearly.id },
+    { key: 'STRIPE_PRICE_PRO_MONTHLY', value: PLANS.pro.prices.monthly.id },
+    { key: 'STRIPE_PRICE_PRO_YEARLY', value: PLANS.pro.prices.yearly.id },
+  ];
+  const missing = required
+    .filter(({ value }) => !value || value.trim() === '')
+    .map(({ key }) => key);
+  return { valid: missing.length === 0, missing };
+}
