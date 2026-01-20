@@ -220,7 +220,7 @@ const stats = useCookingLogStore((state) => state.getRecipeStats(id));
 - `deviceId.ts` - Unique device ID generation using uuid
 - `recipeScaling.ts` - Smart recipe scaling with warnings for non-linear ingredients
 - `recipeOverlap.ts` - Recipe pairing/similarity analysis, shopping efficiency calculations
-- `ingredientMatching.ts` - Pantry finder logic, recipe matching by available ingredients
+- `ingredientMatching.ts` - Pantry finder logic, recipe matching by available ingredients, `getMostCommonIngredients()` for quick selection
 - `timer.ts` - Timer utilities: `parseTimeFromText()`, `formatDuration()`, `formatCountdown()`, mobile device detection, native timer integration
 - `ingredientCategory.ts` - Infers ingredient category from name using keyword matching
 - `markdownParser.ts` - Parses markdown files to extract recipe data
@@ -289,10 +289,11 @@ Fonts: Playfair Display (headings), Inter (body) via next/font/google.
 Main navigation in `src/components/layout/Header.tsx`:
 1. **Home** (`/`) - Landing page
 2. **Recipes** (`/recipes`) - Recipe browsing with filters (includes user recipes)
-3. **Pantry Finder** (`/pantry-finder`) - Find recipes by ingredients you have
-4. **Meal Plan** (`/calendar`) - Calendar drag-and-drop meal planning
-5. **Shopping List** (`/shopping-list`) - Aggregated shopping list
-6. **History** (`/cooking-history`) - Cooking history with stats
+3. **My Recipes** (`/recipes/my-recipes`) - User's imported recipe collection
+4. **Pantry Finder** (`/pantry-finder`) - Find recipes by ingredients you have
+5. **Meal Plan** (`/calendar`) - Calendar drag-and-drop meal planning
+6. **Shopping List** (`/shopping-list`) - Aggregated shopping list
+7. **History** (`/cooking-history`) - Cooking history with stats
 
 Additional routes:
 - `/recipes/my-recipes` - User's imported recipe collection with edit/delete
@@ -329,7 +330,10 @@ Recipe detail pages use `?from=my-recipes` query param to determine back button 
 
 **Pantry Finder Page** (`src/app/pantry-finder/page.tsx`)
 - Ingredient search with autocomplete
-- Recipe matching with percentage scores
+- Multi-select quick options grid (8 most common ingredients by frequency)
+- "Find Recipes" button appears after selecting quick options
+- Recipe matching with percentage scores and filter controls (min match %, sort by)
+- "Clear all" button resets all selections and filters to defaults
 - "What to buy next" suggestions sidebar
 
 **My Recipes Page** (`src/app/recipes/my-recipes/page.tsx`)
