@@ -31,6 +31,9 @@ Mediterranean diet meal planning app built with Next.js 16 App Router. Users bro
 ```
 src/
 ├── app/                  # Next.js App Router pages
+│   ├── (auth)/           # Auth pages (login, signup, confirm-email, forgot-password)
+│   ├── api/stripe/       # Stripe webhook and checkout API routes
+│   ├── auth/callback/    # Supabase auth callback handler
 │   ├── calendar/         # Calendar view for meal planning
 │   ├── cooking-history/  # Cooking history timeline with stats
 │   ├── pantry-finder/    # Ingredient-based recipe finder
@@ -43,10 +46,12 @@ src/
 │   │   └── my-recipes/   # User's imported recipe collection
 │   └── shopping-list/    # Shopping list view
 ├── components/
+│   ├── auth/             # Auth components (AuthForm, PasswordInput)
 │   ├── calendar/         # Calendar-specific components
 │   ├── cooking-log/      # Meal tracking components (rating, logging)
 │   ├── import/           # Recipe import components (RecipePreviewCard)
 │   ├── layout/           # Layout components (header, nav)
+│   ├── onboarding/       # Onboarding components (WelcomeModal)
 │   ├── pantry/           # Pantry finder components
 │   ├── recipes/          # Recipe-specific components
 │   ├── scaling/          # Recipe scaling UI components
@@ -60,8 +65,10 @@ src/
 ├── providers/            # React context providers
 ├── lib/
 │   ├── actions/          # Server actions (userRecipes, scrapeRecipe, storage)
+│   ├── auth/             # Auth server actions (login, signup, resendConfirmation)
 │   ├── constants/        # Animation configs, etc.
 │   ├── data/             # Data access functions
+│   ├── stripe/           # Stripe config and utilities (validateStripeConfig)
 │   ├── supabase/         # Supabase client setup
 │   └── utils/            # Utility functions
 ├── stores/               # Zustand stores
@@ -70,7 +77,7 @@ src/
 
 ### State Management
 
-Three Zustand stores with persist middleware:
+Four Zustand stores with persist middleware:
 
 **useMealPlanStore** (`src/stores/useMealPlanStore.ts`)
 - Stores meal assignments keyed by `"YYYY-MM-DD-mealType"`
@@ -88,6 +95,12 @@ Three Zustand stores with persist middleware:
 - CRUD methods: `updateSession`, `deleteSession`, `getSession`
 - Query methods: `getSessionsInDateRange`, `wasRecentlyCooked`, `isMealLogged`, `getSessionByMealPlanKey`
 - Persists to `meddiet-cooking-log` in localStorage
+
+**useOnboardingStore** (`src/stores/useOnboardingStore.ts`)
+- Tracks onboarding flows: `hasSeenWelcome`, `hasSeenImportGuide`
+- Methods: `markWelcomeSeen()`, `markImportGuideSeen()`, `reset()`
+- Used to show welcome modal on first login after subscription
+- Persists to `meddiet-onboarding` in localStorage
 
 **Important Pattern**: When using computed data from Zustand (like `getRecipeStats`), use `useMemo` instead of calling directly in selector to prevent infinite loops:
 ```typescript
@@ -124,6 +137,12 @@ const stats = useCookingLogStore((state) => state.getRecipeStats(id));
 - `createUserRecipe(data)` - Create new recipe with ingredients/instructions
 - `updateUserRecipe(data)` - Update existing user recipe
 - `deleteUserRecipe(id)` - Delete user recipe
+
+**Auth Server Actions** (`src/lib/auth/actions.ts`):
+- `login(formData)` - Sign in user, detects unconfirmed email errors
+- `signup(formData)` - Register new user with email confirmation redirect
+- `logout()` - Sign out user
+- `resendConfirmation(formData)` - Resend email confirmation link
 
 **Database Schema:**
 - `recipes` table - Core recipe data with `owner_id` foreign key
@@ -184,6 +203,15 @@ const stats = useCookingLogStore((state) => state.getRecipeStats(id));
 - `RecipeMatchCard` - Recipe card with match percentage progress bar
 - `NextIngredientSuggestions` - "What to buy next" suggestions panel
 
+**Onboarding Components** (`src/components/onboarding/`)
+- `WelcomeModal` - Tier-specific welcome modal for new subscribers (Basic vs Pro features)
+  - Props: `isOpen`, `onClose`, `tier: SubscriptionTier`
+  - Shown on first login after subscription via `useOnboardingStore`
+
+**Auth Components** (`src/components/auth/`)
+- `AuthForm` - Shared form wrapper for auth pages with title, description, error/success handling
+- `PasswordInput` - Password field with show/hide toggle
+
 ### Utility Functions
 
 **`src/lib/utils/`**
@@ -233,6 +261,9 @@ Core types in `src/types/`:
 - `MasterIngredient`, `IngredientCategory` for pantry finder
 - `RecipeMatch`, `RecipePairing`, `RecipeSimilarity` for suggestions
 - `ScalingResult`, `ScalingWarning` for recipe scaling
+- `AuthErrorCode`: 'invalid_credentials' | 'email_not_confirmed' | 'email_taken' | 'weak_password' | 'server_error' | 'send_failed'
+- `SubscriptionTier`: 'basic' | 'pro'
+- `SubscriptionStatus`: 'active' | 'trialing' | 'past_due' | 'canceled' | 'unpaid' | null
 
 **Note:** `RecipeIngredient.ingredientId` can be `null` for user-imported ingredients that don't link to master ingredient list.
 
@@ -270,6 +301,13 @@ Additional routes:
 - `/recipes/import/markdown` - Import from markdown files
 - `/recipes/[id]/edit` - Edit user recipe
 
+Auth routes (`src/app/(auth)/`):
+- `/login` - Sign in page with resend confirmation link for unconfirmed users
+- `/signup` - Registration page (redirects to `/confirm-email` on success)
+- `/confirm-email` - Email confirmation pending page with resend option
+- `/forgot-password` - Password reset request
+- `/auth/callback` - OAuth/email confirmation callback handler
+
 **Context-Aware Navigation:**
 Recipe detail pages use `?from=my-recipes` query param to determine back button behavior:
 - From Recipe Collection → back to `/recipes`
@@ -305,3 +343,43 @@ Recipe detail pages use `?from=my-recipes` query param to determine back button 
 - Markdown import parses `.md` files with recipe structure
 - Both use `RecipePreviewCard` for inline editing before save
 - Ingredients auto-categorized using `inferIngredientCategory()`
+
+### Stripe Integration
+
+**Configuration** (`src/lib/stripe/config.ts`):
+- `PLANS` object defines Basic and Pro tier pricing/features
+- `getPriceId(tier, period)` returns price ID for checkout
+- `validateStripeConfig()` validates all price IDs are configured
+
+**Checkout Flow**:
+1. User selects plan on `/pricing`
+2. `POST /api/stripe/checkout` creates Stripe checkout session
+3. On success, Stripe redirects to `/calendar?subscription=success`
+4. Webhook updates `profiles.subscription_status` and `subscription_tier`
+
+**Required Environment Variables**:
+```
+STRIPE_SECRET_KEY
+STRIPE_WEBHOOK_SECRET
+STRIPE_PRICE_BASIC_MONTHLY
+STRIPE_PRICE_BASIC_YEARLY
+STRIPE_PRICE_PRO_MONTHLY
+STRIPE_PRICE_PRO_YEARLY
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+```
+
+### Supabase Auth Configuration
+
+**Email Confirmation**:
+- Signup includes `emailRedirectTo: ${siteUrl}/auth/callback`
+- Email confirmation required before login (when enabled in Supabase)
+- `/confirm-email` page shows pending state with resend option
+
+**Auth Callback** (`src/app/auth/callback/route.ts`):
+- Exchanges auth code for session
+- Checks subscription status
+- Redirects to `/pricing` for new free users, `/calendar` for subscribers
+
+**Required Configuration** (Supabase Dashboard → Auth):
+- Site URL: `https://your-domain.com` (no trailing slash)
+- Redirect URLs: `https://your-domain.com/auth/callback`
