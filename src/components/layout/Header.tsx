@@ -17,10 +17,12 @@ import {
   IconLogin,
   IconChefHat,
   IconPlus,
+  IconUsers,
 } from '@tabler/icons-react';
 import { Logo } from '@/components/ui';
 import { useAuth } from '@/providers/AuthProvider';
 import { logout } from '@/lib/auth/actions';
+import { getMyPendingInvitations } from '@/lib/actions/familyInvitations';
 
 interface NavItem {
   href: string;
@@ -36,13 +38,39 @@ const navItems: NavItem[] = [
   { href: '/calendar', label: 'Meal Plan', icon: IconCalendar },
   { href: '/shopping-list', label: 'Shopping List', icon: IconShoppingCart },
   { href: '/cooking-history', label: 'History', icon: IconChartBar },
+  { href: '/family', label: 'Family', icon: IconUsers },
 ];
 
 export function Header() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [pendingInvitationsCount, setPendingInvitationsCount] = useState(0);
   const { user, isLoading } = useAuth();
+
+  // Fetch pending invitations count for logged-in users
+  useEffect(() => {
+    if (!user) {
+      setPendingInvitationsCount(0);
+      return;
+    }
+
+    const fetchPendingInvitations = async () => {
+      const result = await getMyPendingInvitations();
+      if (result.data) {
+        // Filter out expired invitations
+        const validInvitations = result.data.filter(
+          (inv) => new Date(inv.expiresAt) > new Date()
+        );
+        setPendingInvitationsCount(validInvitations.length);
+      }
+    };
+
+    fetchPendingInvitations();
+    // Refresh every 5 minutes
+    const interval = setInterval(fetchPendingInvitations, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   // Close mobile menu handler
   const closeMobileMenu = useCallback(() => {
@@ -110,6 +138,7 @@ export function Header() {
           <nav className="hidden md:flex items-center gap-1">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
+              const showBadge = item.href === '/family' && pendingInvitationsCount > 0;
               return (
                 <Link
                   key={item.href}
@@ -125,6 +154,11 @@ export function Header() {
                   >
                     {item.label}
                   </span>
+                  {showBadge && (
+                    <span className="ml-1.5 px-1.5 py-0.5 text-xs font-medium bg-terracotta-500 text-white rounded-full min-w-[18px] text-center">
+                      {pendingInvitationsCount}
+                    </span>
+                  )}
                   {isActive && (
                     <motion.div
                       layoutId="nav-indicator"
@@ -298,6 +332,7 @@ export function Header() {
                 <div className="flex flex-col gap-1">
                   {navItems.map((item, index) => {
                     const isActive = pathname === item.href;
+                    const showBadge = item.href === '/family' && pendingInvitationsCount > 0;
                     return (
                       <motion.div
                         key={item.href}
@@ -320,7 +355,12 @@ export function Header() {
                         >
                           <item.icon size={24} className={isActive ? 'text-olive-600' : 'text-foreground/50'} />
                           <span className="whitespace-nowrap">{item.label}</span>
-                          {isActive && (
+                          {showBadge && (
+                            <span className="px-1.5 py-0.5 text-xs font-medium bg-terracotta-500 text-white rounded-full min-w-[18px] text-center">
+                              {pendingInvitationsCount}
+                            </span>
+                          )}
+                          {isActive && !showBadge && (
                             <motion.div
                               layoutId="mobile-nav-indicator"
                               className="ml-auto w-2 h-2 bg-olive-500 rounded-full"

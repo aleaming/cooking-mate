@@ -8,3 +8,4 @@ export * from './recipeSuggestion';
 export * from './recipeScaling';
 export * from './auth';
 export * from './subscription';
+export * from './family';
