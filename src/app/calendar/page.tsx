@@ -19,6 +19,7 @@ import {
 } from '@dnd-kit/core';
 import { MonthlyCalendar, RecipeSidebar, DraggableRecipeCard } from '@/components/calendar';
 import { WelcomeModal } from '@/components/onboarding';
+import { FamilyModeToggle, FamilyContextBanner } from '@/components/family';
 import { allRecipes } from '@/data/recipes';
 import { useMealPlanStore } from '@/stores/useMealPlanStore';
 import { useOnboardingStore } from '@/stores/useOnboardingStore';
@@ -244,13 +245,21 @@ function CalendarPageContent() {
           <div className="max-w-6xl mx-auto">
             {/* Page Header */}
             <div className="mb-4 sm:mb-6">
-              <h1 className="font-display text-xl sm:text-2xl font-bold text-olive-900">
-                Meal Planner
-              </h1>
-              <p className="text-sand-600 mt-1 text-sm sm:text-base">
-                <span className="hidden sm:inline">Drag recipes from the sidebar to plan your meals</span>
-                <span className="sm:hidden">Tap the + button to add recipes</span>
-              </p>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <h1 className="font-display text-xl sm:text-2xl font-bold text-olive-900">
+                    Meal Planner
+                  </h1>
+                  <p className="text-sand-600 mt-1 text-sm sm:text-base">
+                    <span className="hidden sm:inline">Drag recipes from the sidebar to plan your meals</span>
+                    <span className="sm:hidden">Tap the + button to add recipes</span>
+                  </p>
+                </div>
+                <FamilyModeToggle />
+              </div>
+
+              {/* Family Context Banner */}
+              <FamilyContextBanner className="mt-3" />
             </div>
 
             {/* Calendar */}
