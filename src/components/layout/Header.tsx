@@ -31,6 +31,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { href: '/', label: 'Home', icon: IconHome },
   { href: '/recipes', label: 'Recipes', icon: IconBook },
+  { href: '/recipes/my-recipes', label: 'My Recipes', icon: IconChefHat },
   { href: '/pantry-finder', label: 'Pantry Finder', icon: IconSalad },
   { href: '/calendar', label: 'Meal Plan', icon: IconCalendar },
   { href: '/shopping-list', label: 'Shopping List', icon: IconShoppingCart },

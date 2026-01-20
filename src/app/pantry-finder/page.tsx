@@ -9,18 +9,21 @@ import {
   RecipeMatchCard,
   NextIngredientSuggestions,
 } from '@/components/pantry';
-import { findMatchingRecipes } from '@/lib/utils/ingredientMatching';
-import { getMasterIngredients } from '@/lib/data/masterIngredients';
+import { findMatchingRecipes, getMostCommonIngredients } from '@/lib/utils/ingredientMatching';
 import { MasterIngredient } from '@/types';
 import { pageVariants, staggerContainer, staggerItem } from '@/lib/constants/animations';
-import { IconSalad, IconChefHat } from '@tabler/icons-react';
+import { IconSalad, IconChefHat, IconCheck, IconArrowRight, IconX } from '@tabler/icons-react';
 
 export default function PantryFinderPage() {
   const [selectedIngredients, setSelectedIngredients] = useState<Map<string, MasterIngredient>>(
     new Map()
   );
+  const [pendingQuickSelections, setPendingQuickSelections] = useState<Set<string>>(new Set());
   const [minMatch, setMinMatch] = useState(30);
   const [sortBy, setSortBy] = useState<'matchPercentage' | 'missingCount'>('matchPercentage');
+
+  // Get the most common ingredients for quick selection
+  const quickOptions = useMemo(() => getMostCommonIngredients(8), []);
 
   const ingredientIds = useMemo(
     () => new Set(selectedIngredients.keys()),
@@ -56,6 +59,31 @@ export default function PantryFinderPage() {
 
   const handleClearAll = () => {
     setSelectedIngredients(new Map());
+    setPendingQuickSelections(new Set());
+    setMinMatch(30);
+    setSortBy('matchPercentage');
+  };
+
+  const handleQuickOptionToggle = (ingredient: MasterIngredient) => {
+    setPendingQuickSelections((prev) => {
+      const next = new Set(prev);
+      if (next.has(ingredient.id)) {
+        next.delete(ingredient.id);
+      } else {
+        next.add(ingredient.id);
+      }
+      return next;
+    });
+  };
+
+  const handleApplyQuickSelections = () => {
+    const newSelected = new Map(selectedIngredients);
+    pendingQuickSelections.forEach((id) => {
+      const ingredient = quickOptions.find((i) => i.id === id);
+      if (ingredient) newSelected.set(id, ingredient);
+    });
+    setSelectedIngredients(newSelected);
+    setPendingQuickSelections(new Set());
   };
 
   return (
@@ -113,16 +141,16 @@ export default function PantryFinderPage() {
                   />
                 ))}
               </AnimatePresence>
-              {selectedIngredients.size >= 3 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleClearAll}
-                  className="text-sand-500"
-                >
-                  Clear all
-                </Button>
-              )}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleClearAll}
+                className="text-sand-600 border-sand-300"
+              >
+                <IconX size={14} className="mr-1" />
+                Clear all
+              </Button>
             </div>
           ) : (
             <p className="text-center text-sand-500">
@@ -237,36 +265,82 @@ export default function PantryFinderPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="text-center py-16 bg-white rounded-2xl shadow-sm"
+            className="text-center py-12 bg-white rounded-2xl shadow-sm"
           >
             <IconChefHat size={64} className="mx-auto mb-4 text-sand-400" />
             <h3 className="font-display text-xl font-semibold text-olive-900 mb-2">
               What&apos;s in your kitchen?
             </h3>
             <p className="text-sand-600 max-w-md mx-auto mb-6">
-              Start by adding the ingredients you have at home, and we&apos;ll show you
+              Select the ingredients you have, then click &quot;Find Recipes&quot; to see
               what delicious Mediterranean dishes you can make!
             </p>
-            <div className="flex flex-wrap justify-center gap-2">
-              {['Olive oil', 'Garlic', 'Tomatoes', 'Feta cheese', 'Lemon'].map(
-                (name) => {
-                  const ingredients = getMasterIngredients();
-                  const ingredient = ingredients.find(
-                    (i) => i.name.toLowerCase() === name.toLowerCase()
-                  );
-                  if (!ingredient) return null;
+
+            {/* Quick Select Grid */}
+            <div className="max-w-2xl mx-auto px-4">
+              <p className="text-sm text-sand-500 mb-3">
+                Popular ingredients to start:
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
+                {quickOptions.map((ingredient) => {
+                  const isSelected = pendingQuickSelections.has(ingredient.id);
                   return (
-                    <Button
-                      key={name}
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleAddIngredient(ingredient)}
+                    <button
+                      key={ingredient.id}
+                      onClick={() => handleQuickOptionToggle(ingredient)}
+                      className={`
+                        relative flex items-center gap-2 px-3 py-2.5 rounded-xl
+                        text-left text-sm font-medium transition-all
+                        ${
+                          isSelected
+                            ? 'bg-olive-500 text-white shadow-md shadow-olive-500/20'
+                            : 'bg-sand-100 text-olive-800 hover:bg-sand-200'
+                        }
+                      `}
                     >
-                      + {name}
-                    </Button>
+                      <span
+                        className={`
+                          w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0
+                          ${isSelected ? 'bg-olive-400' : 'bg-white border border-sand-300'}
+                        `}
+                      >
+                        {isSelected && <IconCheck size={14} className="text-white" />}
+                      </span>
+                      <span className="flex-1 truncate">{ingredient.name}</span>
+                      <span
+                        className={`
+                          text-xs px-1.5 py-0.5 rounded-md
+                          ${isSelected ? 'bg-olive-400 text-olive-100' : 'bg-sand-200 text-sand-600'}
+                        `}
+                      >
+                        {ingredient.frequency}
+                      </span>
+                    </button>
                   );
-                }
-              )}
+                })}
+              </div>
+
+              {/* Find Recipes Button */}
+              <AnimatePresence>
+                {pendingQuickSelections.size > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                  >
+                    <Button
+                      variant="primary"
+                      size="lg"
+                      onClick={handleApplyQuickSelections}
+                      className="px-8"
+                    >
+                      Find Recipes with {pendingQuickSelections.size} ingredient
+                      {pendingQuickSelections.size !== 1 ? 's' : ''}
+                      <IconArrowRight size={18} className="ml-2" />
+                    </Button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </motion.div>
         )}

@@ -282,3 +282,16 @@ export function canMakeRecipe(
     missing,
   };
 }
+
+/**
+ * Get the most common ingredients across all recipes
+ * Useful for quick-start ingredient selection
+ */
+export function getMostCommonIngredients(limit: number = 8): MasterIngredient[] {
+  const masterList = getMasterIngredients();
+
+  // Sort by frequency (number of recipes that use this ingredient)
+  return [...masterList]
+    .sort((a, b) => b.frequency - a.frequency)
+    .slice(0, limit);
+}
