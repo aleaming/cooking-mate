@@ -15,6 +15,7 @@ import { IconMail, IconCheck, IconX } from '@tabler/icons-react';
 function SignupForm() {
   const searchParams = useSearchParams();
   const errorCode = searchParams.get('error') as AuthErrorCode | null;
+  const returnTo = searchParams.get('returnTo');
 
   const [password, setPassword] = useState('');
   const passwordValidation = validatePassword(password);
@@ -61,6 +62,9 @@ function SignupForm() {
         animate="animate"
         className="space-y-4"
       >
+        {/* Hidden field to preserve returnTo through signup flow */}
+        {returnTo && <input type="hidden" name="returnTo" value={returnTo} />}
+
         <motion.div variants={staggerItem}>
           <Input
             type="email"

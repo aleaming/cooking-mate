@@ -47,6 +47,7 @@ export async function signup(formData: FormData) {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
   const confirmPassword = formData.get('confirmPassword') as string;
+  const returnTo = formData.get('returnTo') as string | null;
 
   // Validate email
   if (!email || !validateEmail(email)) {
@@ -67,12 +68,18 @@ export async function signup(formData: FormData) {
   const supabase = await createServerSupabaseClient();
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
+  // Build email redirect URL with returnTo as `next` param for auth callback
+  const safeReturnTo = returnTo && returnTo.startsWith('/') ? returnTo : null;
+  const emailRedirectUrl = safeReturnTo
+    ? `${siteUrl}/auth/callback?next=${encodeURIComponent(safeReturnTo)}`
+    : `${siteUrl}/auth/callback`;
+
   const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       // Enable email confirmation - redirect to auth callback after confirming
-      emailRedirectTo: `${siteUrl}/auth/callback`,
+      emailRedirectTo: emailRedirectUrl,
     },
   });
 
@@ -84,8 +91,11 @@ export async function signup(formData: FormData) {
     redirectWithError('/signup', 'signup_failed');
   }
 
-  // Redirect to confirmation pending page
-  redirect('/confirm-email');
+  // Redirect to confirmation pending page with returnTo preserved
+  const confirmEmailUrl = safeReturnTo
+    ? `/confirm-email?returnTo=${encodeURIComponent(safeReturnTo)}`
+    : '/confirm-email';
+  redirect(confirmEmailUrl);
 }
 
 export async function forgotPassword(formData: FormData) {
@@ -151,6 +161,7 @@ export async function logout() {
 
 export async function resendConfirmation(formData: FormData) {
   const email = formData.get('email') as string;
+  const returnTo = formData.get('returnTo') as string | null;
 
   if (!email) {
     redirectWithError('/confirm-email', 'invalid_email');
@@ -159,17 +170,31 @@ export async function resendConfirmation(formData: FormData) {
   const supabase = await createServerSupabaseClient();
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
+  // Build email redirect URL with returnTo as `next` param for auth callback
+  const safeReturnTo = returnTo && returnTo.startsWith('/') ? returnTo : null;
+  const emailRedirectUrl = safeReturnTo
+    ? `${siteUrl}/auth/callback?next=${encodeURIComponent(safeReturnTo)}`
+    : `${siteUrl}/auth/callback`;
+
   const { error } = await supabase.auth.resend({
     type: 'signup',
     email,
     options: {
-      emailRedirectTo: `${siteUrl}/auth/callback`,
+      emailRedirectTo: emailRedirectUrl,
     },
   });
 
   if (error) {
-    redirectWithError('/confirm-email', 'send_failed');
+    // Preserve returnTo in error redirect
+    const errorUrl = safeReturnTo
+      ? `/confirm-email?error=send_failed&returnTo=${encodeURIComponent(safeReturnTo)}`
+      : '/confirm-email?error=send_failed';
+    redirect(errorUrl);
   }
 
-  redirect('/confirm-email?sent=true');
+  // Preserve returnTo in success redirect
+  const successUrl = safeReturnTo
+    ? `/confirm-email?sent=true&returnTo=${encodeURIComponent(safeReturnTo)}`
+    : '/confirm-email?sent=true';
+  redirect(successUrl);
 }

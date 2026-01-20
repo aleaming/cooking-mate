@@ -15,6 +15,7 @@ function ConfirmEmailForm() {
   const searchParams = useSearchParams();
   const errorCode = searchParams.get('error') as AuthErrorCode | null;
   const emailSent = searchParams.get('sent') === 'true';
+  const returnTo = searchParams.get('returnTo');
   const [showResendForm, setShowResendForm] = useState(false);
 
   const [, formAction, isPending] = useActionState(
@@ -72,6 +73,9 @@ function ConfirmEmailForm() {
             variants={staggerItem}
             className="space-y-4 text-left"
           >
+            {/* Hidden field to preserve returnTo through resend flow */}
+            {returnTo && <input type="hidden" name="returnTo" value={returnTo} />}
+
             <Input
               type="email"
               name="email"
