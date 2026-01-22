@@ -62,7 +62,17 @@ export async function createFamily(
       return { data: null, error: 'Failed to set up family membership' };
     }
 
+    // Set this new family as the user's active family (makes it the default)
+    await supabase
+      .from('profiles')
+      .update({
+        active_family_id: family.id,
+        family_mode_enabled: true,
+      })
+      .eq('id', user.id);
+
     revalidatePath('/family');
+    revalidatePath('/calendar');
 
     return {
       data: {

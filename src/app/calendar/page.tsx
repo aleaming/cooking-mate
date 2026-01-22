@@ -25,10 +25,21 @@ import { useMealPlanStore } from '@/stores/useMealPlanStore';
 import { useOnboardingStore } from '@/stores/useOnboardingStore';
 import { useAuth } from '@/providers/AuthProvider';
 import { getUserRecipes } from '@/lib/actions/userRecipes';
+import { getFamilyContext } from '@/lib/actions/family';
+import { getFamilyMealPlans, proposeFamilyMeal, removeFamilyMeal } from '@/lib/actions/familyMealPlans';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { Recipe, MealSlotType } from '@/types';
+import type { FamilyMealPlanWithDetails, FamilyWithDetails, FamilyPermissions, FamilyRole } from '@/types/family';
 import { pageVariants } from '@/lib/constants/animations';
 import type { SubscriptionTier, SubscriptionStatus } from '@/types/subscription';
+
+// Family context type for the calendar
+interface FamilyContextData {
+  activeFamily: FamilyWithDetails | null;
+  familyModeEnabled: boolean;
+  permissions: FamilyPermissions | null;
+  role: FamilyRole | null;
+}
 
 function CalendarPageContent() {
   const { addMeal, fetchMeals, currentYear, currentMonth } = useMealPlanStore();
@@ -44,6 +55,12 @@ function CalendarPageContent() {
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState<SubscriptionTier | null>(null);
   const hasFetchedRef = useRef<string | null>(null);
+
+  // Family mode state
+  const [familyContext, setFamilyContext] = useState<FamilyContextData | null>(null);
+  const [familyMealPlans, setFamilyMealPlans] = useState<FamilyMealPlanWithDetails[]>([]);
+  const [familyMealsLoading, setFamilyMealsLoading] = useState(false);
+  const familyFetchedRef = useRef<string | null>(null);
 
   // Handle subscription success query parameter
   useEffect(() => {
@@ -83,6 +100,60 @@ function CalendarPageContent() {
 
     checkSubscription();
   }, [user, authLoading, hasSeenWelcome]);
+
+  // Load family context when user is authenticated
+  useEffect(() => {
+    if (authLoading || !user) {
+      setFamilyContext(null);
+      setFamilyMealPlans([]);
+      return;
+    }
+
+    async function loadFamilyContext() {
+      const result = await getFamilyContext();
+      if (result.data) {
+        setFamilyContext(result.data);
+      } else {
+        setFamilyContext(null);
+      }
+    }
+
+    loadFamilyContext();
+  }, [user, authLoading]);
+
+  // Load family meal plans when in family mode and month changes
+  useEffect(() => {
+    if (!familyContext?.familyModeEnabled || !familyContext?.activeFamily) {
+      setFamilyMealPlans([]);
+      return;
+    }
+
+    const fetchKey = `family-${familyContext.activeFamily.id}-${currentYear}-${currentMonth}`;
+    if (familyFetchedRef.current === fetchKey) return;
+
+    async function loadFamilyMeals() {
+      if (!familyContext?.activeFamily) return;
+
+      setFamilyMealsLoading(true);
+      const startDate = startOfMonth(new Date(currentYear, currentMonth));
+      const endDate = endOfMonth(new Date(currentYear, currentMonth));
+
+      const result = await getFamilyMealPlans({
+        familyId: familyContext.activeFamily.id,
+        startDate: format(startDate, 'yyyy-MM-dd'),
+        endDate: format(endDate, 'yyyy-MM-dd'),
+        status: 'all',
+      });
+
+      if (result.data) {
+        setFamilyMealPlans(result.data);
+      }
+      setFamilyMealsLoading(false);
+      familyFetchedRef.current = fetchKey;
+    }
+
+    loadFamilyMeals();
+  }, [familyContext?.familyModeEnabled, familyContext?.activeFamily, currentYear, currentMonth]);
 
   // Fetch meal plans from Supabase when user is authenticated and month changes
   useEffect(() => {
@@ -175,7 +246,7 @@ function CalendarPageContent() {
   }, []);
 
   const handleDragEnd = useCallback(
-    (event: DragEndEvent) => {
+    async (event: DragEndEvent) => {
       const { active, over } = event;
 
       setActiveRecipe(null);
@@ -187,10 +258,37 @@ function CalendarPageContent() {
       const dropData = over.data.current as { dateString: string; mealType: MealSlotType } | undefined;
 
       if (recipe && dropData) {
-        addMeal(dropData.dateString, dropData.mealType, recipe);
+        // If in family mode, create a family meal plan
+        if (familyContext?.familyModeEnabled && familyContext?.activeFamily) {
+          const result = await proposeFamilyMeal({
+            familyId: familyContext.activeFamily.id,
+            planDate: dropData.dateString,
+            mealType: dropData.mealType,
+            recipeId: recipe.id,
+            servings: recipe.servings || 4,
+          });
+
+          if (result.data) {
+            // Refresh family meals
+            const startDate = startOfMonth(new Date(currentYear, currentMonth));
+            const endDate = endOfMonth(new Date(currentYear, currentMonth));
+            const refreshResult = await getFamilyMealPlans({
+              familyId: familyContext.activeFamily.id,
+              startDate: format(startDate, 'yyyy-MM-dd'),
+              endDate: format(endDate, 'yyyy-MM-dd'),
+              status: 'all',
+            });
+            if (refreshResult.data) {
+              setFamilyMealPlans(refreshResult.data);
+            }
+          }
+        } else {
+          // Personal meal plan
+          addMeal(dropData.dateString, dropData.mealType, recipe);
+        }
       }
     },
-    [addMeal]
+    [addMeal, familyContext, currentYear, currentMonth]
   );
 
   return (
@@ -263,7 +361,29 @@ function CalendarPageContent() {
             </div>
 
             {/* Calendar */}
-            <MonthlyCalendar activeDropId={activeDropId} />
+            <MonthlyCalendar
+              activeDropId={activeDropId}
+              familyModeEnabled={familyContext?.familyModeEnabled || false}
+              familyId={familyContext?.activeFamily?.id}
+              familyMealPlans={familyMealPlans}
+              onRemoveFamilyMeal={async (mealPlanId: string) => {
+                const result = await removeFamilyMeal(mealPlanId);
+                if (!result.error && familyContext?.activeFamily) {
+                  // Refresh family meals
+                  const startDate = startOfMonth(new Date(currentYear, currentMonth));
+                  const endDate = endOfMonth(new Date(currentYear, currentMonth));
+                  const refreshResult = await getFamilyMealPlans({
+                    familyId: familyContext.activeFamily.id,
+                    startDate: format(startDate, 'yyyy-MM-dd'),
+                    endDate: format(endDate, 'yyyy-MM-dd'),
+                    status: 'all',
+                  });
+                  if (refreshResult.data) {
+                    setFamilyMealPlans(refreshResult.data);
+                  }
+                }
+              }}
+            />
 
             {/* Legend */}
             <div className="mt-4 flex flex-wrap items-center gap-4 sm:gap-6 text-sm text-sand-600">

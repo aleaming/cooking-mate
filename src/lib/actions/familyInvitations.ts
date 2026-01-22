@@ -217,7 +217,17 @@ export async function acceptInvitation(
       return { data: null, error: data.error };
     }
 
+    // Set this family as the user's active family (makes it the default)
+    await supabase
+      .from('profiles')
+      .update({
+        active_family_id: data.family_id,
+        family_mode_enabled: true,
+      })
+      .eq('id', user.id);
+
     revalidatePath('/family');
+    revalidatePath('/calendar');
 
     return {
       data: {

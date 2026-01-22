@@ -7,12 +7,23 @@ import { getCalendarDays, getMonthYearDisplay, getWeekDayNames } from '@/lib/uti
 import { CalendarDay } from './CalendarDay';
 import { Button } from '@/components/ui';
 import { staggerContainer, slideLeft, slideRight } from '@/lib/constants/animations';
+import type { FamilyMealPlanWithDetails } from '@/types/family';
 
 interface MonthlyCalendarProps {
   activeDropId: string | null;
+  familyModeEnabled?: boolean;
+  familyId?: string;
+  familyMealPlans?: FamilyMealPlanWithDetails[];
+  onRemoveFamilyMeal?: (mealPlanId: string) => Promise<void>;
 }
 
-export function MonthlyCalendar({ activeDropId }: MonthlyCalendarProps) {
+export function MonthlyCalendar({
+  activeDropId,
+  familyModeEnabled = false,
+  familyId,
+  familyMealPlans = [],
+  onRemoveFamilyMeal,
+}: MonthlyCalendarProps) {
   const {
     currentYear,
     currentMonth,
@@ -86,6 +97,9 @@ export function MonthlyCalendar({ activeDropId }: MonthlyCalendarProps) {
             key={day.dateString}
             day={day}
             activeDropId={activeDropId}
+            familyModeEnabled={familyModeEnabled}
+            familyMealPlans={familyMealPlans}
+            onRemoveFamilyMeal={onRemoveFamilyMeal}
           />
         ))}
       </motion.div>

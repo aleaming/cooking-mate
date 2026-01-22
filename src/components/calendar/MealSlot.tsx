@@ -1,15 +1,19 @@
 'use client';
 
-import { ComponentType } from 'react';
+import { ComponentType, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { MealSlotType, Recipe } from '@/types';
+import type { FamilyMealPlanWithDetails } from '@/types/family';
 import { SPRING } from '@/lib/constants/animations';
 import { MarkAsCookedButton } from '@/components/cooking-log';
-import { IconSunrise, IconSun, IconMoon } from '@tabler/icons-react';
+import { IconSunrise, IconSun, IconMoon, IconUsers } from '@tabler/icons-react';
+import { allRecipes } from '@/data/recipes';
 
 interface MealSlotProps {
   mealType: MealSlotType;
   recipe: Recipe | null;
+  familyMeal?: FamilyMealPlanWithDetails | null;
+  familyModeEnabled?: boolean;
   date: string; // YYYY-MM-DD
   isOver?: boolean;
   onClick?: () => void;
@@ -46,8 +50,43 @@ const mealTypeColors: Record<MealSlotType, { bg: string; border: string; text: s
   },
 };
 
-export function MealSlot({ mealType, recipe, date, isOver, onClick, onRemove }: MealSlotProps) {
+export function MealSlot({
+  mealType,
+  recipe,
+  familyMeal,
+  familyModeEnabled = false,
+  date,
+  isOver,
+  onClick,
+  onRemove,
+}: MealSlotProps) {
   const colors = mealTypeColors[mealType];
+
+  // Resolve recipe for family meal
+  const resolvedRecipe = useMemo(() => {
+    if (!familyModeEnabled || !familyMeal) return recipe;
+
+    // Look up recipe by ID - first check static recipes
+    const staticRecipe = allRecipes.find((r) => r.id === familyMeal.recipeId);
+    if (staticRecipe) return staticRecipe;
+
+    // For user recipes (id starts with 'user-'), we can't resolve here
+    // In the future, this could be passed from parent or fetched
+    // For now, return a placeholder
+    if (familyMeal.recipeId.startsWith('user-')) {
+      return {
+        id: familyMeal.recipeId,
+        name: 'User Recipe',
+        totalTimeMinutes: 0,
+        mealType: mealType,
+      } as Recipe;
+    }
+
+    return null;
+  }, [recipe, familyMeal, familyModeEnabled, mealType]);
+
+  const displayRecipe = familyModeEnabled ? resolvedRecipe : recipe;
+  const isFamilyMeal = familyModeEnabled && familyMeal;
 
   return (
     <motion.div
@@ -64,30 +103,39 @@ export function MealSlot({ mealType, recipe, date, isOver, onClick, onRemove }: 
       className={`
         relative rounded-lg border-2 border-dashed p-1.5 min-h-[52px]
         cursor-pointer transition-colors
-        ${recipe ? `${colors.bg} ${colors.border} border-solid` : 'border-sand-200 hover:border-sand-300 hover:bg-sand-50'}
+        ${displayRecipe ? `${colors.bg} ${colors.border} border-solid` : 'border-sand-200 hover:border-sand-300 hover:bg-sand-50'}
         ${isOver ? 'border-olive-400 bg-olive-50' : ''}
       `}
     >
-      {recipe ? (
+      {displayRecipe ? (
         <div className="flex items-start gap-1.5">
+          {/* Family indicator */}
+          {isFamilyMeal && (
+            <div className="absolute -top-1 -left-1 bg-aegean-500 rounded-full p-0.5" title="Family meal">
+              <IconUsers size={10} className="text-white" />
+            </div>
+          )}
+
           {/* Recipe Info */}
           <div className="flex-1 min-w-0">
             <p className={`text-xs font-medium ${colors.text} truncate`}>
-              {recipe.name}
+              {displayRecipe.name}
             </p>
             <p className="text-[10px] text-sand-500 flex items-center gap-1">
               {(() => { const Icon = mealTypeIcons[mealType]; return <Icon size={12} className="text-sand-400" />; })()}
-              <span>{recipe.totalTimeMinutes} min</span>
+              {displayRecipe.totalTimeMinutes > 0 && <span>{displayRecipe.totalTimeMinutes} min</span>}
             </p>
           </div>
 
-          {/* Mark as Cooked Button */}
-          <MarkAsCookedButton
-            recipe={recipe}
-            date={date}
-            mealType={mealType}
-            size="sm"
-          />
+          {/* Mark as Cooked Button - only for non-family meals for now */}
+          {!isFamilyMeal && (
+            <MarkAsCookedButton
+              recipe={displayRecipe}
+              date={date}
+              mealType={mealType}
+              size="sm"
+            />
+          )}
 
           {/* Remove Button */}
           {onRemove && (
