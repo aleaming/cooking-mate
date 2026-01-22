@@ -36,6 +36,9 @@ src/
 │   ├── auth/callback/    # Supabase auth callback handler
 │   ├── calendar/         # Calendar view for meal planning
 │   ├── cooking-history/  # Cooking history timeline with stats
+│   ├── family/           # Family sharing feature
+│   │   ├── join/[token]/ # Accept invitation page
+│   │   └── settings/     # Family management page
 │   ├── pantry-finder/    # Ingredient-based recipe finder
 │   ├── recipes/          # Recipe browsing
 │   │   ├── [id]/         # Dynamic recipe detail page (with scaling, suggestions)
@@ -49,6 +52,7 @@ src/
 │   ├── auth/             # Auth components (AuthForm, PasswordInput)
 │   ├── calendar/         # Calendar-specific components
 │   ├── cooking-log/      # Meal tracking components (rating, logging)
+│   ├── family/           # Family sharing components
 │   ├── import/           # Recipe import components (RecipePreviewCard)
 │   ├── layout/           # Layout components (header, nav)
 │   ├── onboarding/       # Onboarding components (WelcomeModal)
@@ -64,7 +68,7 @@ src/
 ├── hooks/                # Custom React hooks
 ├── providers/            # React context providers
 ├── lib/
-│   ├── actions/          # Server actions (userRecipes, scrapeRecipe, storage)
+│   ├── actions/          # Server actions (userRecipes, scrapeRecipe, storage, family*)
 │   ├── auth/             # Auth server actions (login, signup, resendConfirmation)
 │   ├── constants/        # Animation configs, etc.
 │   ├── data/             # Data access functions
@@ -77,7 +81,7 @@ src/
 
 ### State Management
 
-Four Zustand stores with persist middleware:
+Five Zustand stores with persist middleware:
 
 **useMealPlanStore** (`src/stores/useMealPlanStore.ts`)
 - Stores meal assignments keyed by `"YYYY-MM-DD-mealType"`
@@ -101,6 +105,13 @@ Four Zustand stores with persist middleware:
 - Methods: `markWelcomeSeen()`, `markImportGuideSeen()`, `reset()`
 - Used to show welcome modal on first login after subscription
 - Persists to `meddiet-onboarding` in localStorage
+
+**useFamilyStore** (`src/stores/useFamilyStore.ts`)
+- Manages family sharing state: `activeFamily`, `familyMembers`, `familyMode`
+- Tracks user's families and pending invitations
+- Methods: `setActiveFamily()`, `toggleFamilyMode()`, `fetchMyFamilies()`, `fetchFamilyMembers()`
+- Permission helpers: `getPermissions()`, `canUserVote()`, `isOwnerOrAdmin()`
+- Persists to `meddiet-family` in localStorage
 
 **Important Pattern**: When using computed data from Zustand (like `getRecipeStats`), use `useMemo` instead of calling directly in selector to prevent infinite loops:
 ```typescript
@@ -139,15 +150,41 @@ const stats = useCookingLogStore((state) => state.getRecipeStats(id));
 - `deleteUserRecipe(id)` - Delete user recipe
 
 **Auth Server Actions** (`src/lib/auth/actions.ts`):
-- `login(formData)` - Sign in user, detects unconfirmed email errors
-- `signup(formData)` - Register new user with email confirmation redirect
+- `login(formData)` - Sign in user, detects unconfirmed email errors, supports `returnUrl`
+- `signup(formData)` - Register new user with email confirmation, supports `returnTo` preservation
 - `logout()` - Sign out user
-- `resendConfirmation(formData)` - Resend email confirmation link
+- `resendConfirmation(formData)` - Resend email confirmation link, preserves `returnTo`
+
+**Family Server Actions** (`src/lib/actions/family*.ts`):
+- `createFamily(name)` - Create new family, user becomes owner
+- `getMyFamilies()` - List families user belongs to
+- `getFamilyById(familyId)` - Get family details with members
+- `updateFamily(familyId, data)` - Update family settings (owner/admin only)
+- `deleteFamily(familyId)` - Delete family (owner only)
+- `leaveFamily(familyId)` - Leave a family (non-owners)
+
+**Family Invitation Actions** (`src/lib/actions/familyInvitations.ts`):
+- `sendInvitation(input)` - Create invitation with token (manual link sharing)
+- `getInvitationByToken(token)` - Get invitation preview for acceptance page
+- `acceptInvitation(token)` - Accept invitation and join family
+- `getPendingInvitations(familyId)` - List pending invites for a family
+- `revokeInvitation(invitationId)` - Cancel pending invite
+- `resendInvitation(invitationId)` - Create new invitation (revokes old one)
+
+**Family Member Actions** (`src/lib/actions/familyMembers.ts`):
+- `updateMemberRole(memberId, role)` - Change member role (owner/admin only)
+- `removeMember(memberId)` - Remove member from family
+- `updateMemberNickname(memberId, nickname)` - Set display name
 
 **Database Schema:**
 - `recipes` table - Core recipe data with `owner_id` foreign key
 - `recipe_ingredients` table - Ingredients with optional `ingredient_id` (null for user imports)
 - `recipe_photos` table - User-uploaded recipe images
+- `families` table - Family/household groups with `owner_id`, `max_members` (default 5)
+- `family_members` table - Membership with `role` (owner/admin/voter/viewer)
+- `family_invitations` table - Token-based invitations with 7-day expiry
+- `family_meal_plans` table - Shared meal plans with voting status
+- `family_meal_votes` table - Vote records (approve/reject/abstain)
 
 ### Component Patterns
 
@@ -212,6 +249,18 @@ const stats = useCookingLogStore((state) => state.getRecipeStats(id));
 - `AuthForm` - Shared form wrapper for auth pages with title, description, error/success handling
 - `PasswordInput` - Password field with show/hide toggle
 
+**Family Components** (`src/components/family/`)
+- `FamilyDashboard` - Overview of family with member list and quick actions
+- `FamilyMemberList` - List of members with role badges and management actions
+- `FamilyMemberCard` - Individual member card with role, actions (kick, change role)
+- `CreateFamilyModal` - Modal to create new family with name input
+- `InviteMemberModal` - Send invitation with email, role selection, and copy link
+- `InvitationList` - Pending invitations with resend/revoke actions
+- `AcceptInvitationCard` - Invitation preview with accept/decline buttons
+- `FamilySettingsForm` - Edit family name and settings
+- `FamilyModeToggle` - Switch between personal and family mode
+- `RoleBadge` - Colored badge for member roles (olive=owner, aegean=admin, terracotta=voter, sand=viewer)
+
 ### Utility Functions
 
 **`src/lib/utils/`**
@@ -264,6 +313,13 @@ Core types in `src/types/`:
 - `AuthErrorCode`: 'invalid_credentials' | 'email_not_confirmed' | 'email_taken' | 'weak_password' | 'server_error' | 'send_failed'
 - `SubscriptionTier`: 'basic' | 'pro'
 - `SubscriptionStatus`: 'active' | 'trialing' | 'past_due' | 'canceled' | 'unpaid' | null
+- `Family`, `FamilyMember`, `FamilyWithMembers` for family data
+- `FamilyRole`: 'owner' | 'admin' | 'voter' | 'viewer'
+- `FamilyInvitation`, `FamilyInvitationWithDetails`, `InvitationPreview`
+- `InvitationStatus`: 'pending' | 'accepted' | 'expired' | 'revoked'
+- `FamilyMealPlan`, `FamilyMealVote`, `MealPlanStatus`, `VoteType`
+- `FamilyPermissions` - Permission flags based on role
+- `FamilyActionResponse<T>` - Standard response type with data/error
 
 **Note:** `RecipeIngredient.ingredientId` can be `null` for user-imported ingredients that don't link to master ingredient list.
 
@@ -294,6 +350,7 @@ Main navigation in `src/components/layout/Header.tsx`:
 5. **Meal Plan** (`/calendar`) - Calendar drag-and-drop meal planning
 6. **Shopping List** (`/shopping-list`) - Aggregated shopping list
 7. **History** (`/cooking-history`) - Cooking history with stats
+8. **Family** (`/family`) - Family dashboard (when in family mode)
 
 Additional routes:
 - `/recipes/my-recipes` - User's imported recipe collection with edit/delete
@@ -307,7 +364,12 @@ Auth routes (`src/app/(auth)/`):
 - `/signup` - Registration page (redirects to `/confirm-email` on success)
 - `/confirm-email` - Email confirmation pending page with resend option
 - `/forgot-password` - Password reset request
-- `/auth/callback` - OAuth/email confirmation callback handler
+- `/auth/callback` - OAuth/email confirmation callback handler (supports `next` param)
+
+Family routes:
+- `/family` - Family dashboard with member list and actions
+- `/family/settings` - Family management (name, members, invitations)
+- `/family/join/[token]` - Accept invitation page (works for logged-in and new users)
 
 **Context-Aware Navigation:**
 Recipe detail pages use `?from=my-recipes` query param to determine back button behavior:
@@ -381,9 +443,49 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 
 **Auth Callback** (`src/app/auth/callback/route.ts`):
 - Exchanges auth code for session
-- Checks subscription status
-- Redirects to `/pricing` for new free users, `/calendar` for subscribers
+- Supports `next` query param for custom redirect destination
+- Default: checks subscription status, redirects to `/pricing` or `/calendar`
+
+**returnTo Parameter Flow**:
+The auth system preserves `returnTo` through the entire signup flow for deep linking:
+1. `/signup?returnTo=/family/join/[token]` - Signup page reads param
+2. Form includes hidden `returnTo` field passed to server action
+3. `signup()` action includes `returnTo` as `next` in email redirect URL
+4. `/confirm-email?returnTo=...` - Preserves param for resend flow
+5. Email link → `/auth/callback?next=/family/join/[token]`
+6. Callback redirects to the original destination
+
+This enables invitation acceptance for new users who need to sign up first.
 
 **Required Configuration** (Supabase Dashboard → Auth):
 - Site URL: `https://your-domain.com` (no trailing slash)
 - Redirect URLs: `https://your-domain.com/auth/callback`
+
+### Family Sharing Feature
+
+**Overview**: Enables households to collaborate on meal planning with role-based permissions.
+
+**Roles** (hierarchical):
+- **Owner** - Full control, can delete family, only one per family
+- **Admin** - Can manage members and invitations
+- **Voter** - Can vote on meal proposals
+- **Viewer** - View-only access to family content
+
+**Invitation Flow**:
+1. Owner/Admin creates invitation via `InviteMemberModal`
+2. System generates unique token (64-char hex), expires in 7 days
+3. Inviter manually shares link: `/family/join/[token]`
+4. Recipient visits link → sees invitation preview
+5. If logged in → can accept immediately
+6. If not logged in → signup flow preserves `returnTo` to return after confirmation
+7. On accept → `accept_family_invitation()` database function creates membership
+
+**Database Functions** (SECURITY DEFINER):
+- `is_family_member(family_id, user_id)` - Check membership
+- `get_family_role(family_id, user_id)` - Get user's role
+- `can_manage_family(family_id, user_id)` - Check owner/admin
+- `can_vote_in_family(family_id, user_id)` - Check voting permission
+- `accept_family_invitation(token, user_id)` - Handle invitation acceptance
+- `get_invitation_by_token(token)` - Get invitation preview
+
+**RLS Policies**: All family tables use Row Level Security with policies that call the helper functions above to prevent infinite recursion.
