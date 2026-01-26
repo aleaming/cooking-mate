@@ -17,7 +17,7 @@ import {
   DragEndEvent,
   DragOverEvent,
 } from '@dnd-kit/core';
-import { MonthlyCalendar, RecipeSidebar, DraggableRecipeCard } from '@/components/calendar';
+import { MonthlyCalendar, RecipeSidebar, DraggableRecipeCard, MealDetailModal } from '@/components/calendar';
 import { WelcomeModal } from '@/components/onboarding';
 import { FamilyModeToggle, FamilyContextBanner } from '@/components/family';
 import { allRecipes } from '@/data/recipes';
@@ -42,7 +42,7 @@ interface FamilyContextData {
 }
 
 function CalendarPageContent() {
-  const { addMeal, fetchMeals, currentYear, currentMonth } = useMealPlanStore();
+  const { addMeal, removeMeal, fetchMeals, currentYear, currentMonth } = useMealPlanStore();
   const { user, isLoading: authLoading } = useAuth();
   const hasSeenWelcome = useOnboardingStore((state) => state.hasSeenWelcome);
   const searchParams = useSearchParams();
@@ -61,6 +61,23 @@ function CalendarPageContent() {
   const [familyMealPlans, setFamilyMealPlans] = useState<FamilyMealPlanWithDetails[]>([]);
   const [familyMealsLoading, setFamilyMealsLoading] = useState(false);
   const familyFetchedRef = useRef<string | null>(null);
+
+  // Meal detail modal state
+  const [selectedMeal, setSelectedMeal] = useState<{
+    recipe: Recipe;
+    date: string;
+    mealType: MealSlotType;
+    familyMeal?: FamilyMealPlanWithDetails | null;
+  } | null>(null);
+
+  const handleMealClick = useCallback((data: {
+    recipe: Recipe;
+    date: string;
+    mealType: MealSlotType;
+    familyMeal?: FamilyMealPlanWithDetails | null;
+  }) => {
+    setSelectedMeal(data);
+  }, []);
 
   // Handle subscription success query parameter
   useEffect(() => {
@@ -366,6 +383,7 @@ function CalendarPageContent() {
               familyModeEnabled={familyContext?.familyModeEnabled || false}
               familyId={familyContext?.activeFamily?.id}
               familyMealPlans={familyMealPlans}
+              onMealClick={handleMealClick}
               onRemoveFamilyMeal={async (mealPlanId: string) => {
                 const result = await removeFamilyMeal(mealPlanId);
                 if (!result.error && familyContext?.activeFamily) {
@@ -511,6 +529,39 @@ function CalendarPageContent() {
           isOpen={showWelcomeModal}
           onClose={() => setShowWelcomeModal(false)}
           tier={subscriptionTier}
+        />
+      )}
+
+      {/* Meal Detail Modal */}
+      {selectedMeal && (
+        <MealDetailModal
+          isOpen={!!selectedMeal}
+          onClose={() => setSelectedMeal(null)}
+          recipe={selectedMeal.recipe}
+          date={selectedMeal.date}
+          mealType={selectedMeal.mealType}
+          familyMeal={selectedMeal.familyMeal}
+          onRemove={() => {
+            if (selectedMeal.familyMeal && familyContext?.activeFamily) {
+              removeFamilyMeal(selectedMeal.familyMeal.id).then(async () => {
+                if (familyContext?.activeFamily) {
+                  const startDate = startOfMonth(new Date(currentYear, currentMonth));
+                  const endDate = endOfMonth(new Date(currentYear, currentMonth));
+                  const refreshResult = await getFamilyMealPlans({
+                    familyId: familyContext.activeFamily.id,
+                    startDate: format(startDate, 'yyyy-MM-dd'),
+                    endDate: format(endDate, 'yyyy-MM-dd'),
+                    status: 'all',
+                  });
+                  if (refreshResult.data) {
+                    setFamilyMealPlans(refreshResult.data);
+                  }
+                }
+              });
+            } else {
+              removeMeal(selectedMeal.date, selectedMeal.mealType);
+            }
+          }}
         />
       )}
     </motion.div>

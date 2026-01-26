@@ -8,6 +8,14 @@ import { CalendarDay } from './CalendarDay';
 import { Button } from '@/components/ui';
 import { staggerContainer, slideLeft, slideRight } from '@/lib/constants/animations';
 import type { FamilyMealPlanWithDetails } from '@/types/family';
+import { MealSlotType, Recipe } from '@/types';
+
+interface MealClickData {
+  recipe: Recipe;
+  date: string;
+  mealType: MealSlotType;
+  familyMeal?: FamilyMealPlanWithDetails | null;
+}
 
 interface MonthlyCalendarProps {
   activeDropId: string | null;
@@ -15,6 +23,7 @@ interface MonthlyCalendarProps {
   familyId?: string;
   familyMealPlans?: FamilyMealPlanWithDetails[];
   onRemoveFamilyMeal?: (mealPlanId: string) => Promise<void>;
+  onMealClick?: (data: MealClickData) => void;
 }
 
 export function MonthlyCalendar({
@@ -23,6 +32,7 @@ export function MonthlyCalendar({
   familyId,
   familyMealPlans = [],
   onRemoveFamilyMeal,
+  onMealClick,
 }: MonthlyCalendarProps) {
   const {
     currentYear,
@@ -100,6 +110,7 @@ export function MonthlyCalendar({
             familyModeEnabled={familyModeEnabled}
             familyMealPlans={familyMealPlans}
             onRemoveFamilyMeal={onRemoveFamilyMeal}
+            onMealClick={onMealClick}
           />
         ))}
       </motion.div>

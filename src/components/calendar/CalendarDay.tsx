@@ -9,6 +9,14 @@ import { CalendarDay as CalendarDayType } from '@/lib/utils/dates';
 import { MealSlot } from './MealSlot';
 import { staggerItem } from '@/lib/constants/animations';
 import type { FamilyMealPlanWithDetails } from '@/types/family';
+import { allRecipes } from '@/data/recipes';
+
+interface MealClickData {
+  recipe: Recipe;
+  date: string;
+  mealType: MealSlotType;
+  familyMeal?: FamilyMealPlanWithDetails | null;
+}
 
 interface CalendarDayProps {
   day: CalendarDayType;
@@ -16,6 +24,7 @@ interface CalendarDayProps {
   familyModeEnabled?: boolean;
   familyMealPlans?: FamilyMealPlanWithDetails[];
   onRemoveFamilyMeal?: (mealPlanId: string) => Promise<void>;
+  onMealClick?: (data: MealClickData) => void;
 }
 
 const mealTypes: MealSlotType[] = ['breakfast', 'lunch', 'dinner'];
@@ -26,6 +35,7 @@ export function CalendarDay({
   familyModeEnabled = false,
   familyMealPlans = [],
   onRemoveFamilyMeal,
+  onMealClick,
 }: CalendarDayProps) {
   const { getMealsForDate, removeMeal } = useMealPlanStore();
   const personalMeals = getMealsForDate(day.dateString);
@@ -78,6 +88,22 @@ export function CalendarDay({
           const familyMeal = familyModeEnabled ? familyMealsForDay[mealType] : null;
           const personalMeal = !familyModeEnabled ? personalMeals[mealType] : null;
 
+          // Resolve the display recipe for click handler
+          let displayRecipe: Recipe | null = null;
+          if (familyModeEnabled && familyMeal) {
+            displayRecipe = allRecipes.find((r) => r.id === familyMeal.recipeId) || null;
+            if (!displayRecipe && familyMeal.recipeId.startsWith('user-')) {
+              displayRecipe = {
+                id: familyMeal.recipeId,
+                name: 'User Recipe',
+                totalTimeMinutes: 0,
+                mealType,
+              } as Recipe;
+            }
+          } else if (personalMeal?.recipe) {
+            displayRecipe = personalMeal.recipe;
+          }
+
           return (
             <DroppableMealSlot
               key={`${day.dateString}-${mealType}`}
@@ -94,6 +120,16 @@ export function CalendarDay({
                   : personalMeal
                     ? () => removeMeal(day.dateString, mealType)
                     : undefined
+              }
+              onClick={
+                displayRecipe && onMealClick
+                  ? () => onMealClick({
+                      recipe: displayRecipe!,
+                      date: day.dateString,
+                      mealType,
+                      familyMeal,
+                    })
+                  : undefined
               }
             />
           );
@@ -112,6 +148,7 @@ interface DroppableMealSlotProps {
   familyModeEnabled?: boolean;
   isActiveDropTarget: boolean;
   onRemove?: () => void;
+  onClick?: () => void;
 }
 
 function DroppableMealSlot({
@@ -123,6 +160,7 @@ function DroppableMealSlot({
   familyModeEnabled = false,
   isActiveDropTarget,
   onRemove,
+  onClick,
 }: DroppableMealSlotProps) {
   const { isOver, setNodeRef } = useDroppable({
     id,
@@ -144,6 +182,7 @@ function DroppableMealSlot({
         date={dateString}
         isOver={isOver || isActiveDropTarget}
         onRemove={hasMeal ? onRemove : undefined}
+        onClick={onClick}
       />
     </div>
   );
