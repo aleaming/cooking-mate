@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { motion } from 'framer-motion';
@@ -9,9 +10,15 @@ import { SPRING } from '@/lib/constants/animations';
 
 interface DraggableRecipeCardProps {
   recipe: Recipe & { ownerName?: string };
+  isSelected?: boolean;
+  onClickSelect?: (recipe: Recipe & { ownerName?: string }) => void;
 }
 
-export function DraggableRecipeCard({ recipe }: DraggableRecipeCardProps) {
+export const DraggableRecipeCard = memo(function DraggableRecipeCard({
+  recipe,
+  isSelected,
+  onClickSelect,
+}: DraggableRecipeCardProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: `recipe-${recipe.id}`,
     data: {
@@ -26,12 +33,19 @@ export function DraggableRecipeCard({ recipe }: DraggableRecipeCardProps) {
       }
     : undefined;
 
+  const handleClick = () => {
+    if (!isDragging && onClickSelect) {
+      onClickSelect(recipe);
+    }
+  };
+
   return (
     <motion.div
       ref={setNodeRef}
       style={style}
       {...listeners}
       {...attributes}
+      onClick={handleClick}
       initial={{ opacity: 0, y: 10 }}
       animate={{
         opacity: isDragging ? 0.5 : 1,
@@ -46,6 +60,7 @@ export function DraggableRecipeCard({ recipe }: DraggableRecipeCardProps) {
       className={`
         bg-card rounded-xl p-3 cursor-grab active:cursor-grabbing
         ${isDragging ? 'z-50' : ''}
+        ${isSelected ? 'ring-2 ring-olive-500 bg-olive-50' : ''}
       `}
     >
       {/* Recipe Image Placeholder */}
@@ -90,7 +105,7 @@ export function DraggableRecipeCard({ recipe }: DraggableRecipeCardProps) {
       </div>
     </motion.div>
   );
-}
+});
 
 function ClockIcon({ className }: { className?: string }) {
   return (

@@ -8,16 +8,18 @@ import { SPRING } from '@/lib/constants/animations';
 import { MarkAsCookedButton } from '@/components/cooking-log';
 import { VotingResultsBadge } from '@/components/family';
 import { IconSunrise, IconSun, IconMoon, IconUsers } from '@tabler/icons-react';
-import { allRecipes } from '@/data/recipes';
 
 interface MealSlotProps {
   mealType: MealSlotType;
   recipe: Recipe | null;
   familyMeal?: FamilyMealPlanWithDetails | null;
   familyModeEnabled?: boolean;
-  recipeList?: Recipe[];
+  recipeMap?: Map<string, Recipe>;
   date: string; // YYYY-MM-DD
   isOver?: boolean;
+  isPlacementMode?: boolean;
+  onPlacementClick?: () => void;
+  isPlacementSuccess?: boolean;
   onClick?: () => void;
   onRemove?: () => void;
 }
@@ -57,22 +59,22 @@ export function MealSlot({
   recipe,
   familyMeal,
   familyModeEnabled = false,
-  recipeList,
+  recipeMap,
   date,
   isOver,
+  isPlacementMode,
+  onPlacementClick,
+  isPlacementSuccess,
   onClick,
   onRemove,
 }: MealSlotProps) {
   const colors = mealTypeColors[mealType];
 
-  // Resolve recipe for family meal
+  // Resolve recipe for family meal — O(1) Map lookup
   const resolvedRecipe = useMemo(() => {
     if (!familyModeEnabled || !familyMeal) return recipe;
-
-    // Look up recipe by ID from combined list (includes family recipes) or static recipes
-    const list = recipeList?.length ? recipeList : allRecipes;
-    return list.find((r) => r.id === familyMeal.recipeId) || null;
-  }, [recipe, familyMeal, familyModeEnabled, recipeList]);
+    return recipeMap?.get(familyMeal.recipeId) ?? null;
+  }, [recipe, familyMeal, familyModeEnabled, recipeMap]);
 
   const displayRecipe = familyModeEnabled ? resolvedRecipe : recipe;
   const isFamilyMeal = familyModeEnabled && familyMeal;
@@ -87,24 +89,36 @@ export function MealSlot({
         : 'bg-aegean-500'
     : 'bg-aegean-500';
 
+  // In placement mode, empty slots respond to clicks to place the recipe
+  const handleClick = () => {
+    if (!displayRecipe && isPlacementMode && onPlacementClick) {
+      onPlacementClick();
+    } else if (onClick) {
+      onClick();
+    }
+  };
+
+  const isEmptyPlacement = !displayRecipe && isPlacementMode;
+
   return (
     <motion.div
-      layout
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{
         opacity: 1,
-        scale: isOver ? 1.02 : 1,
+        scale: isOver || isPlacementSuccess ? 1.02 : 1,
         borderColor: isOver ? 'rgb(34, 197, 94)' : undefined,
         backgroundColor: isOver ? 'var(--olive-100)' : undefined,
       }}
       transition={SPRING.gentle}
-      onClick={onClick}
+      onClick={handleClick}
       className={`
         relative rounded-lg border-2 border-dashed p-1.5 min-h-[52px]
         cursor-pointer transition-colors
         ${displayRecipe ? `${colors.bg} ${colors.border} border-solid` : 'border-sand-200 hover:border-sand-300 hover:bg-sand-50'}
         ${isOver ? 'border-olive-400 bg-olive-50' : ''}
         ${isRejected ? 'opacity-50' : ''}
+        ${isEmptyPlacement ? 'ring-2 ring-dashed ring-olive-300 bg-olive-50/30 hover:bg-olive-100/50' : ''}
+        ${isPlacementSuccess ? 'bg-olive-100 ring-2 ring-olive-500 border-olive-500' : ''}
       `}
     >
       {displayRecipe ? (

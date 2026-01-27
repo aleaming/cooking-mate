@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useDroppable } from '@dnd-kit/core';
 import { MealSlotType, Recipe } from '@/types';
@@ -9,7 +9,6 @@ import { CalendarDay as CalendarDayType } from '@/lib/utils/dates';
 import { MealSlot } from './MealSlot';
 import { staggerItem } from '@/lib/constants/animations';
 import type { FamilyMealPlanWithDetails } from '@/types/family';
-import { allRecipes } from '@/data/recipes';
 
 interface MealClickData {
   recipe: Recipe;
@@ -22,44 +21,57 @@ interface CalendarDayProps {
   day: CalendarDayType;
   activeDropId: string | null;
   familyModeEnabled?: boolean;
-  familyMealPlans?: FamilyMealPlanWithDetails[];
-  recipeList?: Recipe[];
+  familyMealsForDay?: FamilyMealPlanWithDetails[];
+  recipeMap?: Map<string, Recipe>;
   onRemoveFamilyMeal?: (mealPlanId: string) => Promise<void>;
   onMealClick?: (data: MealClickData) => void;
+  isPlacementMode?: boolean;
+  onPlacementSlotClick?: (dateString: string, mealType: MealSlotType) => void;
+  placementSuccess?: string | null;
 }
 
 const mealTypes: MealSlotType[] = ['breakfast', 'lunch', 'dinner'];
 
-export function CalendarDay({
+export const CalendarDay = memo(function CalendarDay({
   day,
   activeDropId,
   familyModeEnabled = false,
-  familyMealPlans = [],
-  recipeList,
+  familyMealsForDay,
+  recipeMap,
   onRemoveFamilyMeal,
   onMealClick,
+  isPlacementMode,
+  onPlacementSlotClick,
+  placementSuccess,
 }: CalendarDayProps) {
-  const { getMealsForDate, removeMeal } = useMealPlanStore();
-  const personalMeals = getMealsForDate(day.dateString);
+  // Granular Zustand selectors — only re-render when THIS day's meals change
+  const breakfastMeal = useMealPlanStore((state) => state.mealPlans[`${day.dateString}-breakfast`] ?? null);
+  const lunchMeal = useMealPlanStore((state) => state.mealPlans[`${day.dateString}-lunch`] ?? null);
+  const dinnerMeal = useMealPlanStore((state) => state.mealPlans[`${day.dateString}-dinner`] ?? null);
+  const removeMeal = useMealPlanStore((state) => state.removeMeal);
 
-  // Get family meals for this day
-  const familyMealsForDay = useMemo((): Record<MealSlotType, FamilyMealPlanWithDetails | null> => {
-    const mealsMap: Record<MealSlotType, FamilyMealPlanWithDetails | null> = {
+  const personalMeals = useMemo(() => ({
+    breakfast: breakfastMeal,
+    lunch: lunchMeal,
+    dinner: dinnerMeal,
+  }), [breakfastMeal, lunchMeal, dinnerMeal]);
+
+  // Convert pre-filtered family meals array to a record keyed by meal type
+  const familyMealsRecord = useMemo((): Record<MealSlotType, FamilyMealPlanWithDetails | null> => {
+    const record: Record<MealSlotType, FamilyMealPlanWithDetails | null> = {
       breakfast: null,
       lunch: null,
       dinner: null,
     };
-    if (!familyModeEnabled) return mealsMap;
-    familyMealPlans
-      .filter((meal) => meal.planDate === day.dateString)
-      .forEach((meal) => {
-        mealsMap[meal.mealType] = meal;
-      });
-    return mealsMap;
-  }, [familyModeEnabled, familyMealPlans, day.dateString]);
+    if (!familyModeEnabled || !familyMealsForDay) return record;
+    for (const meal of familyMealsForDay) {
+      record[meal.mealType] = meal;
+    }
+    return record;
+  }, [familyModeEnabled, familyMealsForDay]);
 
   // Use family meals if in family mode, otherwise personal meals
-  const meals = familyModeEnabled ? familyMealsForDay : personalMeals;
+  const meals = familyModeEnabled ? familyMealsRecord : personalMeals;
 
   return (
     <motion.div
@@ -87,14 +99,13 @@ export function CalendarDay({
       {/* Meal Slots */}
       <div className="space-y-1">
         {mealTypes.map((mealType) => {
-          const familyMeal = familyModeEnabled ? familyMealsForDay[mealType] : null;
+          const familyMeal = familyModeEnabled ? familyMealsRecord[mealType] : null;
           const personalMeal = !familyModeEnabled ? personalMeals[mealType] : null;
 
-          // Resolve the display recipe for click handler
+          // Resolve the display recipe for click handler — O(1) Map lookup
           let displayRecipe: Recipe | null = null;
           if (familyModeEnabled && familyMeal) {
-            const list = recipeList?.length ? recipeList : allRecipes;
-            displayRecipe = list.find((r) => r.id === familyMeal.recipeId) || null;
+            displayRecipe = recipeMap?.get(familyMeal.recipeId) ?? null;
           } else if (personalMeal?.recipe) {
             displayRecipe = personalMeal.recipe;
           }
@@ -108,8 +119,15 @@ export function CalendarDay({
               recipe={personalMeal?.recipe || null}
               familyMeal={familyMeal}
               familyModeEnabled={familyModeEnabled}
-              recipeList={recipeList}
+              recipeMap={recipeMap}
               isActiveDropTarget={activeDropId === `${day.dateString}-${mealType}`}
+              isPlacementMode={isPlacementMode}
+              onPlacementClick={
+                isPlacementMode && onPlacementSlotClick
+                  ? () => onPlacementSlotClick(day.dateString, mealType)
+                  : undefined
+              }
+              isPlacementSuccess={placementSuccess === `${day.dateString}-${mealType}`}
               onRemove={
                 familyMeal && onRemoveFamilyMeal
                   ? () => onRemoveFamilyMeal(familyMeal.id)
@@ -133,7 +151,7 @@ export function CalendarDay({
       </div>
     </motion.div>
   );
-}
+});
 
 interface DroppableMealSlotProps {
   id: string;
@@ -142,8 +160,11 @@ interface DroppableMealSlotProps {
   recipe: Recipe | null;
   familyMeal?: FamilyMealPlanWithDetails | null;
   familyModeEnabled?: boolean;
-  recipeList?: Recipe[];
+  recipeMap?: Map<string, Recipe>;
   isActiveDropTarget: boolean;
+  isPlacementMode?: boolean;
+  onPlacementClick?: () => void;
+  isPlacementSuccess?: boolean;
   onRemove?: () => void;
   onClick?: () => void;
 }
@@ -155,8 +176,11 @@ function DroppableMealSlot({
   recipe,
   familyMeal,
   familyModeEnabled = false,
-  recipeList,
+  recipeMap,
   isActiveDropTarget,
+  isPlacementMode,
+  onPlacementClick,
+  isPlacementSuccess,
   onRemove,
   onClick,
 }: DroppableMealSlotProps) {
@@ -177,9 +201,12 @@ function DroppableMealSlot({
         recipe={recipe}
         familyMeal={familyMeal}
         familyModeEnabled={familyModeEnabled}
-        recipeList={recipeList}
+        recipeMap={recipeMap}
         date={dateString}
         isOver={isOver || isActiveDropTarget}
+        isPlacementMode={isPlacementMode}
+        onPlacementClick={onPlacementClick}
+        isPlacementSuccess={isPlacementSuccess}
         onRemove={hasMeal ? onRemove : undefined}
         onClick={onClick}
       />

@@ -1,12 +1,12 @@
 'use client';
 
 import { useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useMealPlanStore } from '@/stores/useMealPlanStore';
 import { getCalendarDays, getMonthYearDisplay, getWeekDayNames } from '@/lib/utils/dates';
 import { CalendarDay } from './CalendarDay';
 import { Button } from '@/components/ui';
-import { staggerContainer, slideLeft, slideRight } from '@/lib/constants/animations';
+import { staggerContainer } from '@/lib/constants/animations';
 import type { FamilyMealPlanWithDetails } from '@/types/family';
 import { MealSlotType, Recipe } from '@/types';
 
@@ -22,19 +22,27 @@ interface MonthlyCalendarProps {
   familyModeEnabled?: boolean;
   familyId?: string;
   familyMealPlans?: FamilyMealPlanWithDetails[];
-  recipeList?: Recipe[];
+  recipeMap?: Map<string, Recipe>;
   onRemoveFamilyMeal?: (mealPlanId: string) => Promise<void>;
   onMealClick?: (data: MealClickData) => void;
+  isPlacementMode?: boolean;
+  onPlacementSlotClick?: (dateString: string, mealType: MealSlotType) => void;
+  placementSuccess?: string | null;
 }
+
+const EMPTY_FAMILY_MEALS: FamilyMealPlanWithDetails[] = [];
 
 export function MonthlyCalendar({
   activeDropId,
   familyModeEnabled = false,
   familyId,
   familyMealPlans = [],
-  recipeList,
+  recipeMap,
   onRemoveFamilyMeal,
   onMealClick,
+  isPlacementMode,
+  onPlacementSlotClick,
+  placementSuccess,
 }: MonthlyCalendarProps) {
   const {
     currentYear,
@@ -48,6 +56,21 @@ export function MonthlyCalendar({
     () => getCalendarDays(currentYear, currentMonth),
     [currentYear, currentMonth]
   );
+
+  // Pre-compute family meals by date for O(1) per-day lookup
+  const familyMealsByDate = useMemo(() => {
+    if (!familyMealPlans.length) return new Map<string, FamilyMealPlanWithDetails[]>();
+    const map = new Map<string, FamilyMealPlanWithDetails[]>();
+    for (const meal of familyMealPlans) {
+      const existing = map.get(meal.planDate);
+      if (existing) {
+        existing.push(meal);
+      } else {
+        map.set(meal.planDate, [meal]);
+      }
+    }
+    return map;
+  }, [familyMealPlans]);
 
   const monthYearDisplay = getMonthYearDisplay(currentYear, currentMonth);
   const weekDays = getWeekDayNames();
@@ -110,10 +133,13 @@ export function MonthlyCalendar({
             day={day}
             activeDropId={activeDropId}
             familyModeEnabled={familyModeEnabled}
-            familyMealPlans={familyMealPlans}
-            recipeList={recipeList}
+            familyMealsForDay={familyMealsByDate.get(day.dateString) || EMPTY_FAMILY_MEALS}
+            recipeMap={recipeMap}
             onRemoveFamilyMeal={onRemoveFamilyMeal}
             onMealClick={onMealClick}
+            isPlacementMode={isPlacementMode}
+            onPlacementSlotClick={onPlacementSlotClick}
+            placementSuccess={placementSuccess}
           />
         ))}
       </motion.div>

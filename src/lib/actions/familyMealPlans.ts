@@ -527,3 +527,55 @@ export async function getFamilyMealPlanById(
     return { data: null, error: 'Failed to fetch meal plan. Please try again.' };
   }
 }
+
+/**
+ * Lightweight check for family meal plan updates since a given timestamp.
+ * Returns count of changes (meals + votes) made by other family members.
+ * Uses head: true for count-only queries — no row data transferred.
+ */
+export async function checkFamilyMealUpdates(input: {
+  familyId: string;
+  startDate: string;
+  endDate: string;
+  since: string;
+}): Promise<FamilyActionResponse<{ mealChanges: number; voteChanges: number }>> {
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return { data: null, error: 'Not authenticated' };
+    }
+
+    // Count meal plan changes since last refresh (exclude own changes)
+    const { count: mealChanges } = await supabase
+      .from('family_meal_plans')
+      .select('*', { count: 'exact', head: true })
+      .eq('family_id', input.familyId)
+      .gte('plan_date', input.startDate)
+      .lte('plan_date', input.endDate)
+      .gt('updated_at', input.since)
+      .neq('created_by', user.id);
+
+    // Count vote changes since last refresh (exclude own votes)
+    const { count: voteChanges } = await supabase
+      .from('family_meal_votes')
+      .select('*, family_meal_plans!inner(family_id, plan_date)', { count: 'exact', head: true })
+      .eq('family_meal_plans.family_id', input.familyId)
+      .gte('family_meal_plans.plan_date', input.startDate)
+      .lte('family_meal_plans.plan_date', input.endDate)
+      .gt('voted_at', input.since)
+      .neq('user_id', user.id);
+
+    return {
+      data: {
+        mealChanges: mealChanges ?? 0,
+        voteChanges: voteChanges ?? 0,
+      },
+      error: null,
+    };
+  } catch (error) {
+    console.error('Error in checkFamilyMealUpdates:', error);
+    return { data: null, error: 'Failed to check for updates' };
+  }
+}

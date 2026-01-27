@@ -12,6 +12,8 @@ type RecipeWithOwner = Recipe & { ownerName?: string };
 
 interface RecipeSidebarProps {
   recipes: RecipeWithOwner[];
+  selectedRecipeId?: string;
+  onSelectRecipe?: (recipe: RecipeWithOwner) => void;
 }
 
 interface MealTypeFilter {
@@ -27,7 +29,7 @@ const mealTypeFilters: MealTypeFilter[] = [
   { value: 'dinner', label: '', icon: IconMoon },
 ];
 
-export function RecipeSidebar({ recipes }: RecipeSidebarProps) {
+export function RecipeSidebar({ recipes, selectedRecipeId, onSelectRecipe }: RecipeSidebarProps) {
   const [search, setSearch] = useState('');
   const [mealFilter, setMealFilter] = useState<MealType | 'all'>('all');
 
@@ -112,7 +114,7 @@ export function RecipeSidebar({ recipes }: RecipeSidebarProps) {
       {/* Recipe List */}
       <div className="flex-1 overflow-y-auto p-3">
         <p className="text-xs text-sand-500 mb-3">
-          Drag recipes to the calendar
+          Click or drag a recipe to add it to the calendar
         </p>
 
         {hasFamilyRecipes ? (
@@ -131,7 +133,11 @@ export function RecipeSidebar({ recipes }: RecipeSidebarProps) {
                 >
                   {myRecipes.map((recipe) => (
                     <motion.div key={recipe.id} variants={staggerItem}>
-                      <DraggableRecipeCard recipe={recipe} />
+                      <DraggableRecipeCard
+                        recipe={recipe}
+                        isSelected={selectedRecipeId === recipe.id}
+                        onClickSelect={onSelectRecipe}
+                      />
                     </motion.div>
                   ))}
                 </motion.div>
@@ -151,7 +157,11 @@ export function RecipeSidebar({ recipes }: RecipeSidebarProps) {
             >
               {familyMemberRecipes.map((recipe) => (
                 <motion.div key={recipe.id} variants={staggerItem}>
-                  <DraggableRecipeCard recipe={recipe} />
+                  <DraggableRecipeCard
+                    recipe={recipe}
+                    isSelected={selectedRecipeId === recipe.id}
+                    onClickSelect={onSelectRecipe}
+                  />
                 </motion.div>
               ))}
             </motion.div>
@@ -165,7 +175,11 @@ export function RecipeSidebar({ recipes }: RecipeSidebarProps) {
           >
             {filteredRecipes.map((recipe) => (
               <motion.div key={recipe.id} variants={staggerItem}>
-                <DraggableRecipeCard recipe={recipe} />
+                <DraggableRecipeCard
+                  recipe={recipe}
+                  isSelected={selectedRecipeId === recipe.id}
+                  onClickSelect={onSelectRecipe}
+                />
               </motion.div>
             ))}
           </motion.div>

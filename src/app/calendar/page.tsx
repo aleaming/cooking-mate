@@ -17,7 +17,7 @@ import {
   DragEndEvent,
   DragOverEvent,
 } from '@dnd-kit/core';
-import { MonthlyCalendar, RecipeSidebar, DraggableRecipeCard, MealDetailModal } from '@/components/calendar';
+import { MonthlyCalendar, RecipeSidebar, DraggableRecipeCard, MealDetailModal, PlacementBanner, FamilyRefreshButton } from '@/components/calendar';
 import { WelcomeModal } from '@/components/onboarding';
 import { FamilyModeToggle, FamilyContextBanner } from '@/components/family';
 import { allRecipes } from '@/data/recipes';
@@ -26,7 +26,7 @@ import { useOnboardingStore } from '@/stores/useOnboardingStore';
 import { useAuth } from '@/providers/AuthProvider';
 import { getUserRecipes, getFamilyRecipes } from '@/lib/actions/userRecipes';
 import { getFamilyContext } from '@/lib/actions/family';
-import { getFamilyMealPlans, proposeFamilyMeal, removeFamilyMeal } from '@/lib/actions/familyMealPlans';
+import { getFamilyMealPlans, proposeFamilyMeal, removeFamilyMeal, checkFamilyMealUpdates } from '@/lib/actions/familyMealPlans';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { Recipe, MealSlotType } from '@/types';
 import type { FamilyMealPlanWithDetails, FamilyWithDetails, FamilyPermissions, FamilyRole } from '@/types/family';
@@ -63,6 +63,11 @@ function CalendarPageContent() {
   const familyFetchedRef = useRef<string | null>(null);
   const [familyRecipes, setFamilyRecipes] = useState<Array<Recipe & { ownerName: string }>>([]);
 
+  // Family refresh polling state
+  const [pendingUpdates, setPendingUpdates] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const lastRefreshedAtRef = useRef<string>(new Date().toISOString());
+
   // Meal detail modal state
   const [selectedMeal, setSelectedMeal] = useState<{
     recipe: Recipe;
@@ -71,6 +76,11 @@ function CalendarPageContent() {
     familyMeal?: FamilyMealPlanWithDetails | null;
   } | null>(null);
 
+  // Click-to-place state
+  const [placementRecipe, setPlacementRecipe] = useState<(Recipe & { ownerName?: string }) | null>(null);
+  const [placementSuccess, setPlacementSuccess] = useState<string | null>(null);
+  const isPlacementMode = !!placementRecipe;
+
   const handleMealClick = useCallback((data: {
     recipe: Recipe;
     date: string;
@@ -78,6 +88,17 @@ function CalendarPageContent() {
     familyMeal?: FamilyMealPlanWithDetails | null;
   }) => {
     setSelectedMeal(data);
+  }, []);
+
+  // Click-to-place handlers
+  const handleSelectRecipe = useCallback((recipe: Recipe & { ownerName?: string }) => {
+    setPlacementRecipe(prev => prev?.id === recipe.id ? null : recipe);
+    setPlacementSuccess(null);
+  }, []);
+
+  const handleCancelPlacement = useCallback(() => {
+    setPlacementRecipe(null);
+    setPlacementSuccess(null);
   }, []);
 
   // Shared helper to refresh family meal plans (DRY)
@@ -101,7 +122,43 @@ function CalendarPageContent() {
       });
     }
     familyFetchedRef.current = null;
+    lastRefreshedAtRef.current = new Date().toISOString();
+    setPendingUpdates(0);
   }, [familyContext?.activeFamily, currentYear, currentMonth]);
+
+  // Handle removing a family meal plan
+  const handleRemoveFamilyMeal = useCallback(async (mealPlanId: string) => {
+    const result = await removeFamilyMeal(mealPlanId);
+    if (!result.error) {
+      await refreshFamilyMeals();
+    }
+  }, [refreshFamilyMeals]);
+
+  // Handle placing a recipe via click-to-place
+  const handlePlacementSlotClick = useCallback(async (dateString: string, mealType: MealSlotType) => {
+    if (!placementRecipe) return;
+
+    if (familyContext?.familyModeEnabled && familyContext?.activeFamily) {
+      const result = await proposeFamilyMeal({
+        familyId: familyContext.activeFamily.id,
+        planDate: dateString,
+        mealType,
+        recipeId: placementRecipe.id,
+        servings: placementRecipe.servings || 4,
+      });
+      if (result.data) {
+        await refreshFamilyMeals();
+      }
+    } else {
+      addMeal(dateString, mealType, placementRecipe);
+    }
+
+    setPlacementSuccess(`${dateString}-${mealType}`);
+    setTimeout(() => {
+      setPlacementRecipe(null);
+      setPlacementSuccess(null);
+    }, 800);
+  }, [placementRecipe, familyContext, addMeal, refreshFamilyMeals]);
 
   // Handle replacing a rejected family meal with a new recipe
   const handleReplaceMeal = useCallback(async (newRecipe: Recipe) => {
@@ -129,6 +186,16 @@ function CalendarPageContent() {
       return () => clearTimeout(timer);
     }
   }, [searchParams, router]);
+
+  // Escape key cancels placement mode
+  useEffect(() => {
+    if (!isPlacementMode) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleCancelPlacement();
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [isPlacementMode, handleCancelPlacement]);
 
   // Check subscription status and show welcome modal for new subscribers
   useEffect(() => {
@@ -279,6 +346,52 @@ function CalendarPageContent() {
     loadFamilyRecipes();
   }, [familyContext?.familyModeEnabled, familyContext?.activeFamily]);
 
+  // Manual refresh handler for the FamilyRefreshButton
+  const handleManualRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    await refreshFamilyMeals();
+    setIsRefreshing(false);
+  }, [refreshFamilyMeals]);
+
+  // Poll for family meal plan updates (30s interval, visibility-aware)
+  useEffect(() => {
+    if (!familyContext?.familyModeEnabled || !familyContext?.activeFamily) return;
+
+    const familyId = familyContext.activeFamily.id;
+
+    const poll = async () => {
+      if (document.hidden) return;
+
+      const sd = format(startOfMonth(new Date(currentYear, currentMonth)), 'yyyy-MM-dd');
+      const ed = format(endOfMonth(new Date(currentYear, currentMonth)), 'yyyy-MM-dd');
+
+      const result = await checkFamilyMealUpdates({
+        familyId,
+        startDate: sd,
+        endDate: ed,
+        since: lastRefreshedAtRef.current,
+      });
+
+      if (result.data) {
+        const total = result.data.mealChanges + result.data.voteChanges;
+        setPendingUpdates(total);
+      }
+    };
+
+    const interval = setInterval(poll, 30_000);
+
+    // Also poll immediately when returning to the tab
+    const handleVisibility = () => {
+      if (!document.hidden) poll();
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, [familyContext?.familyModeEnabled, familyContext?.activeFamily, currentYear, currentMonth]);
+
   // Combine static recipes with user recipes and family recipes
   const combinedRecipes = useMemo(() => {
     const base = [...allRecipes, ...userRecipes];
@@ -292,6 +405,15 @@ function CalendarPageContent() {
     }
     return base;
   }, [userRecipes, familyRecipes]);
+
+  // O(1) recipe lookup map for calendar components
+  const recipeMap = useMemo(() => {
+    const map = new Map<string, Recipe>();
+    for (const r of combinedRecipes) {
+      map.set(r.id, r);
+    }
+    return map;
+  }, [combinedRecipes]);
 
   // Configure sensors with touch-friendly activation constraints
   const pointerSensor = useSensor(PointerSensor, {
@@ -407,7 +529,11 @@ function CalendarPageContent() {
       >
         {/* Desktop Recipe Sidebar - hidden on mobile */}
         <div className="hidden lg:block w-72 flex-shrink-0 h-[calc(100vh-64px)] sticky top-16">
-          <RecipeSidebar recipes={combinedRecipes} />
+          <RecipeSidebar
+            recipes={combinedRecipes}
+            selectedRecipeId={placementRecipe?.id}
+            onSelectRecipe={handleSelectRecipe}
+          />
         </div>
 
         {/* Calendar Area */}
@@ -421,16 +547,31 @@ function CalendarPageContent() {
                     Meal Planner
                   </h1>
                   <p className="text-sand-600 mt-1 text-sm sm:text-base">
-                    <span className="hidden sm:inline">Drag recipes from the sidebar to plan your meals</span>
+                    <span className="hidden sm:inline">Click or drag recipes from the sidebar to plan your meals</span>
                     <span className="sm:hidden">Tap the + button to add recipes</span>
                   </p>
                 </div>
-                <FamilyModeToggle />
+                <div className="flex items-center gap-2">
+                  {familyContext?.familyModeEnabled && (
+                    <FamilyRefreshButton
+                      updateCount={pendingUpdates}
+                      isRefreshing={isRefreshing}
+                      onRefresh={handleManualRefresh}
+                    />
+                  )}
+                  <FamilyModeToggle />
+                </div>
               </div>
 
               {/* Family Context Banner */}
               <FamilyContextBanner className="mt-3" />
             </div>
+
+            {/* Placement Banner */}
+            <PlacementBanner
+              recipe={placementRecipe}
+              onCancel={handleCancelPlacement}
+            />
 
             {/* Calendar */}
             <MonthlyCalendar
@@ -438,14 +579,12 @@ function CalendarPageContent() {
               familyModeEnabled={familyContext?.familyModeEnabled || false}
               familyId={familyContext?.activeFamily?.id}
               familyMealPlans={familyMealPlans}
-              recipeList={combinedRecipes}
+              recipeMap={recipeMap}
               onMealClick={handleMealClick}
-              onRemoveFamilyMeal={async (mealPlanId: string) => {
-                const result = await removeFamilyMeal(mealPlanId);
-                if (!result.error) {
-                  await refreshFamilyMeals();
-                }
-              }}
+              onRemoveFamilyMeal={handleRemoveFamilyMeal}
+              isPlacementMode={isPlacementMode}
+              onPlacementSlotClick={handlePlacementSlotClick}
+              placementSuccess={placementSuccess}
             />
 
             {/* Legend */}
@@ -545,13 +684,20 @@ function CalendarPageContent() {
                 {/* Instruction */}
                 <div className="px-4 py-2 bg-olive-50 border-b border-olive-100">
                   <p className="text-sm text-olive-700">
-                    Long press on a recipe to drag it to the calendar
+                    Tap a recipe, then tap a meal slot on the calendar
                   </p>
                 </div>
 
                 {/* Recipe List */}
                 <div className="flex-1 overflow-hidden h-[calc(80vh-120px)]">
-                  <RecipeSidebar recipes={combinedRecipes} />
+                  <RecipeSidebar
+                    recipes={combinedRecipes}
+                    selectedRecipeId={placementRecipe?.id}
+                    onSelectRecipe={(recipe) => {
+                      handleSelectRecipe(recipe);
+                      setIsMobileDrawerOpen(false);
+                    }}
+                  />
                 </div>
               </motion.div>
             </>
