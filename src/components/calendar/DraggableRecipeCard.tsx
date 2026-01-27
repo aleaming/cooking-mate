@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui';
 import { SPRING } from '@/lib/constants/animations';
 
 interface DraggableRecipeCardProps {
-  recipe: Recipe;
+  recipe: Recipe & { ownerName?: string };
 }
 
 export function DraggableRecipeCard({ recipe }: DraggableRecipeCardProps) {
@@ -61,9 +61,14 @@ export function DraggableRecipeCard({ recipe }: DraggableRecipeCardProps) {
       </div>
 
       {/* Recipe Info */}
-      <h4 className="font-medium text-sm text-olive-900 line-clamp-1 mb-1">
+      <h4 className="font-medium text-sm text-olive-900 line-clamp-1 mb-0.5">
         {recipe.name}
       </h4>
+      {recipe.ownerName && (
+        <p className="text-[10px] text-sand-400 truncate mb-0.5">
+          By {recipe.ownerName}
+        </p>
+      )}
 
       <div className="flex items-center gap-2 text-xs text-sand-600">
         <span className="flex items-center gap-1">

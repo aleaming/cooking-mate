@@ -24,7 +24,7 @@ import { allRecipes } from '@/data/recipes';
 import { useMealPlanStore } from '@/stores/useMealPlanStore';
 import { useOnboardingStore } from '@/stores/useOnboardingStore';
 import { useAuth } from '@/providers/AuthProvider';
-import { getUserRecipes } from '@/lib/actions/userRecipes';
+import { getUserRecipes, getFamilyRecipes } from '@/lib/actions/userRecipes';
 import { getFamilyContext } from '@/lib/actions/family';
 import { getFamilyMealPlans, proposeFamilyMeal, removeFamilyMeal } from '@/lib/actions/familyMealPlans';
 import { getSupabaseClient } from '@/lib/supabase/client';
@@ -61,6 +61,7 @@ function CalendarPageContent() {
   const [familyMealPlans, setFamilyMealPlans] = useState<FamilyMealPlanWithDetails[]>([]);
   const [familyMealsLoading, setFamilyMealsLoading] = useState(false);
   const familyFetchedRef = useRef<string | null>(null);
+  const [familyRecipes, setFamilyRecipes] = useState<Array<Recipe & { ownerName: string }>>([]);
 
   // Meal detail modal state
   const [selectedMeal, setSelectedMeal] = useState<{
@@ -78,6 +79,44 @@ function CalendarPageContent() {
   }) => {
     setSelectedMeal(data);
   }, []);
+
+  // Shared helper to refresh family meal plans (DRY)
+  const refreshFamilyMeals = useCallback(async () => {
+    if (!familyContext?.activeFamily) return;
+    const startDate = startOfMonth(new Date(currentYear, currentMonth));
+    const endDate = endOfMonth(new Date(currentYear, currentMonth));
+    const result = await getFamilyMealPlans({
+      familyId: familyContext.activeFamily.id,
+      startDate: format(startDate, 'yyyy-MM-dd'),
+      endDate: format(endDate, 'yyyy-MM-dd'),
+      status: 'all',
+    });
+    if (result.data) {
+      setFamilyMealPlans(result.data);
+      // Update selectedMeal if it references a family meal that was refreshed
+      setSelectedMeal((prev) => {
+        if (!prev?.familyMeal) return prev;
+        const updated = result.data!.find((m) => m.id === prev.familyMeal!.id);
+        return updated ? { ...prev, familyMeal: updated } : prev;
+      });
+    }
+    familyFetchedRef.current = null;
+  }, [familyContext?.activeFamily, currentYear, currentMonth]);
+
+  // Handle replacing a rejected family meal with a new recipe
+  const handleReplaceMeal = useCallback(async (newRecipe: Recipe) => {
+    if (!selectedMeal?.familyMeal || !familyContext?.activeFamily) return;
+    await removeFamilyMeal(selectedMeal.familyMeal.id);
+    await proposeFamilyMeal({
+      familyId: familyContext.activeFamily.id,
+      planDate: selectedMeal.date,
+      mealType: selectedMeal.mealType,
+      recipeId: newRecipe.id,
+      servings: newRecipe.servings || 4,
+    });
+    await refreshFamilyMeals();
+    setSelectedMeal(null);
+  }, [selectedMeal, familyContext?.activeFamily, refreshFamilyMeals]);
 
   // Handle subscription success query parameter
   useEffect(() => {
@@ -222,10 +261,37 @@ function CalendarPageContent() {
     fetchUserRecipes();
   }, [user, authLoading]);
 
-  // Combine static recipes with user recipes
+  // Fetch family members' recipes when in family mode
+  useEffect(() => {
+    if (!familyContext?.familyModeEnabled || !familyContext?.activeFamily) {
+      setFamilyRecipes([]);
+      return;
+    }
+
+    async function loadFamilyRecipes() {
+      if (!familyContext?.activeFamily) return;
+      const result = await getFamilyRecipes(familyContext.activeFamily.id);
+      if (result.data) {
+        setFamilyRecipes(result.data);
+      }
+    }
+
+    loadFamilyRecipes();
+  }, [familyContext?.familyModeEnabled, familyContext?.activeFamily]);
+
+  // Combine static recipes with user recipes and family recipes
   const combinedRecipes = useMemo(() => {
-    return [...allRecipes, ...userRecipes];
-  }, [userRecipes]);
+    const base = [...allRecipes, ...userRecipes];
+    if (familyRecipes.length > 0) {
+      const existingIds = new Set(base.map((r) => r.id));
+      for (const fr of familyRecipes) {
+        if (!existingIds.has(fr.id)) {
+          base.push(fr);
+        }
+      }
+    }
+    return base;
+  }, [userRecipes, familyRecipes]);
 
   // Configure sensors with touch-friendly activation constraints
   const pointerSensor = useSensor(PointerSensor, {
@@ -286,18 +352,7 @@ function CalendarPageContent() {
           });
 
           if (result.data) {
-            // Refresh family meals
-            const startDate = startOfMonth(new Date(currentYear, currentMonth));
-            const endDate = endOfMonth(new Date(currentYear, currentMonth));
-            const refreshResult = await getFamilyMealPlans({
-              familyId: familyContext.activeFamily.id,
-              startDate: format(startDate, 'yyyy-MM-dd'),
-              endDate: format(endDate, 'yyyy-MM-dd'),
-              status: 'all',
-            });
-            if (refreshResult.data) {
-              setFamilyMealPlans(refreshResult.data);
-            }
+            await refreshFamilyMeals();
           }
         } else {
           // Personal meal plan
@@ -305,7 +360,7 @@ function CalendarPageContent() {
         }
       }
     },
-    [addMeal, familyContext, currentYear, currentMonth]
+    [addMeal, familyContext, currentYear, currentMonth, refreshFamilyMeals]
   );
 
   return (
@@ -383,22 +438,12 @@ function CalendarPageContent() {
               familyModeEnabled={familyContext?.familyModeEnabled || false}
               familyId={familyContext?.activeFamily?.id}
               familyMealPlans={familyMealPlans}
+              recipeList={combinedRecipes}
               onMealClick={handleMealClick}
               onRemoveFamilyMeal={async (mealPlanId: string) => {
                 const result = await removeFamilyMeal(mealPlanId);
-                if (!result.error && familyContext?.activeFamily) {
-                  // Refresh family meals
-                  const startDate = startOfMonth(new Date(currentYear, currentMonth));
-                  const endDate = endOfMonth(new Date(currentYear, currentMonth));
-                  const refreshResult = await getFamilyMealPlans({
-                    familyId: familyContext.activeFamily.id,
-                    startDate: format(startDate, 'yyyy-MM-dd'),
-                    endDate: format(endDate, 'yyyy-MM-dd'),
-                    status: 'all',
-                  });
-                  if (refreshResult.data) {
-                    setFamilyMealPlans(refreshResult.data);
-                  }
+                if (!result.error) {
+                  await refreshFamilyMeals();
                 }
               }}
             />
@@ -542,26 +587,15 @@ function CalendarPageContent() {
           mealType={selectedMeal.mealType}
           familyMeal={selectedMeal.familyMeal}
           onRemove={() => {
-            if (selectedMeal.familyMeal && familyContext?.activeFamily) {
-              removeFamilyMeal(selectedMeal.familyMeal.id).then(async () => {
-                if (familyContext?.activeFamily) {
-                  const startDate = startOfMonth(new Date(currentYear, currentMonth));
-                  const endDate = endOfMonth(new Date(currentYear, currentMonth));
-                  const refreshResult = await getFamilyMealPlans({
-                    familyId: familyContext.activeFamily.id,
-                    startDate: format(startDate, 'yyyy-MM-dd'),
-                    endDate: format(endDate, 'yyyy-MM-dd'),
-                    status: 'all',
-                  });
-                  if (refreshResult.data) {
-                    setFamilyMealPlans(refreshResult.data);
-                  }
-                }
-              });
+            if (selectedMeal.familyMeal) {
+              removeFamilyMeal(selectedMeal.familyMeal.id).then(() => refreshFamilyMeals());
             } else {
               removeMeal(selectedMeal.date, selectedMeal.mealType);
             }
           }}
+          onVoteSuccess={refreshFamilyMeals}
+          onReplaceMeal={handleReplaceMeal}
+          recipes={combinedRecipes}
         />
       )}
     </motion.div>

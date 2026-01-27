@@ -6,10 +6,12 @@ import { Recipe, MealType } from '@/types';
 import { DraggableRecipeCard } from './DraggableRecipeCard';
 import { Input } from '@/components/ui';
 import { staggerContainer, staggerItem } from '@/lib/constants/animations';
-import { IconSunrise, IconSun, IconMoon, IconToolsKitchen2 } from '@tabler/icons-react';
+import { IconSunrise, IconSun, IconMoon, IconToolsKitchen2, IconUsers } from '@tabler/icons-react';
+
+type RecipeWithOwner = Recipe & { ownerName?: string };
 
 interface RecipeSidebarProps {
-  recipes: Recipe[];
+  recipes: RecipeWithOwner[];
 }
 
 interface MealTypeFilter {
@@ -47,6 +49,22 @@ export function RecipeSidebar({ recipes }: RecipeSidebarProps) {
       return true;
     });
   }, [recipes, search, mealFilter]);
+
+  // Split into own recipes and family recipes
+  const { myRecipes, familyMemberRecipes } = useMemo(() => {
+    const mine: RecipeWithOwner[] = [];
+    const family: RecipeWithOwner[] = [];
+    filteredRecipes.forEach((r) => {
+      if (r.ownerName) {
+        family.push(r);
+      } else {
+        mine.push(r);
+      }
+    });
+    return { myRecipes: mine, familyMemberRecipes: family };
+  }, [filteredRecipes]);
+
+  const hasFamilyRecipes = familyMemberRecipes.length > 0;
 
   return (
     <div className="h-full flex flex-col bg-muted border-r border-sand-200 dark:border-sand-700">
@@ -97,18 +115,61 @@ export function RecipeSidebar({ recipes }: RecipeSidebarProps) {
           Drag recipes to the calendar
         </p>
 
-        <motion.div
-          variants={staggerContainer}
-          initial="initial"
-          animate="animate"
-          className="space-y-2"
-        >
-          {filteredRecipes.map((recipe) => (
-            <motion.div key={recipe.id} variants={staggerItem}>
-              <DraggableRecipeCard recipe={recipe} />
+        {hasFamilyRecipes ? (
+          <>
+            {/* My Recipes Section */}
+            {myRecipes.length > 0 && (
+              <>
+                <h3 className="text-xs font-semibold text-sand-500 uppercase tracking-wider mb-2">
+                  My Recipes
+                </h3>
+                <motion.div
+                  variants={staggerContainer}
+                  initial="initial"
+                  animate="animate"
+                  className="space-y-2 mb-4"
+                >
+                  {myRecipes.map((recipe) => (
+                    <motion.div key={recipe.id} variants={staggerItem}>
+                      <DraggableRecipeCard recipe={recipe} />
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </>
+            )}
+
+            {/* Family Recipes Section */}
+            <h3 className="text-xs font-semibold text-sand-500 uppercase tracking-wider mb-2 flex items-center gap-1">
+              <IconUsers size={12} className="text-sand-400" />
+              Family Recipes
+            </h3>
+            <motion.div
+              variants={staggerContainer}
+              initial="initial"
+              animate="animate"
+              className="space-y-2"
+            >
+              {familyMemberRecipes.map((recipe) => (
+                <motion.div key={recipe.id} variants={staggerItem}>
+                  <DraggableRecipeCard recipe={recipe} />
+                </motion.div>
+              ))}
             </motion.div>
-          ))}
-        </motion.div>
+          </>
+        ) : (
+          <motion.div
+            variants={staggerContainer}
+            initial="initial"
+            animate="animate"
+            className="space-y-2"
+          >
+            {filteredRecipes.map((recipe) => (
+              <motion.div key={recipe.id} variants={staggerItem}>
+                <DraggableRecipeCard recipe={recipe} />
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
 
         {filteredRecipes.length === 0 && (
           <div className="text-center py-8 text-sand-500">

@@ -4,3 +4,4 @@ export { MealSlot } from './MealSlot';
 export { MealDetailModal } from './MealDetailModal';
 export { DraggableRecipeCard } from './DraggableRecipeCard';
 export { RecipeSidebar } from './RecipeSidebar';
+export { ReplacementRecipePickerModal } from './ReplacementRecipePickerModal';

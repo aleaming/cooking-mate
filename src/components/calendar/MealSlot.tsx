@@ -6,6 +6,7 @@ import { MealSlotType, Recipe } from '@/types';
 import type { FamilyMealPlanWithDetails } from '@/types/family';
 import { SPRING } from '@/lib/constants/animations';
 import { MarkAsCookedButton } from '@/components/cooking-log';
+import { VotingResultsBadge } from '@/components/family';
 import { IconSunrise, IconSun, IconMoon, IconUsers } from '@tabler/icons-react';
 import { allRecipes } from '@/data/recipes';
 
@@ -14,6 +15,7 @@ interface MealSlotProps {
   recipe: Recipe | null;
   familyMeal?: FamilyMealPlanWithDetails | null;
   familyModeEnabled?: boolean;
+  recipeList?: Recipe[];
   date: string; // YYYY-MM-DD
   isOver?: boolean;
   onClick?: () => void;
@@ -55,6 +57,7 @@ export function MealSlot({
   recipe,
   familyMeal,
   familyModeEnabled = false,
+  recipeList,
   date,
   isOver,
   onClick,
@@ -66,27 +69,23 @@ export function MealSlot({
   const resolvedRecipe = useMemo(() => {
     if (!familyModeEnabled || !familyMeal) return recipe;
 
-    // Look up recipe by ID - first check static recipes
-    const staticRecipe = allRecipes.find((r) => r.id === familyMeal.recipeId);
-    if (staticRecipe) return staticRecipe;
-
-    // For user recipes (id starts with 'user-'), we can't resolve here
-    // In the future, this could be passed from parent or fetched
-    // For now, return a placeholder
-    if (familyMeal.recipeId.startsWith('user-')) {
-      return {
-        id: familyMeal.recipeId,
-        name: 'User Recipe',
-        totalTimeMinutes: 0,
-        mealType: mealType,
-      } as Recipe;
-    }
-
-    return null;
-  }, [recipe, familyMeal, familyModeEnabled, mealType]);
+    // Look up recipe by ID from combined list (includes family recipes) or static recipes
+    const list = recipeList?.length ? recipeList : allRecipes;
+    return list.find((r) => r.id === familyMeal.recipeId) || null;
+  }, [recipe, familyMeal, familyModeEnabled, recipeList]);
 
   const displayRecipe = familyModeEnabled ? resolvedRecipe : recipe;
   const isFamilyMeal = familyModeEnabled && familyMeal;
+  const isRejected = isFamilyMeal && familyMeal?.status === 'rejected';
+
+  // Color-code family indicator by meal plan status
+  const familyIndicatorColor = isFamilyMeal
+    ? familyMeal.status === 'approved'
+      ? 'bg-olive-500'
+      : familyMeal.status === 'rejected'
+        ? 'bg-terracotta-400'
+        : 'bg-aegean-500'
+    : 'bg-aegean-500';
 
   return (
     <motion.div
@@ -105,13 +104,14 @@ export function MealSlot({
         cursor-pointer transition-colors
         ${displayRecipe ? `${colors.bg} ${colors.border} border-solid` : 'border-sand-200 hover:border-sand-300 hover:bg-sand-50'}
         ${isOver ? 'border-olive-400 bg-olive-50' : ''}
+        ${isRejected ? 'opacity-50' : ''}
       `}
     >
       {displayRecipe ? (
         <div className="flex items-start gap-1.5">
           {/* Family indicator */}
           {isFamilyMeal && (
-            <div className="absolute -top-1 -left-1 bg-aegean-500 rounded-full p-0.5" title="Family meal">
+            <div className={`absolute -top-1 -left-1 ${familyIndicatorColor} rounded-full p-0.5`} title="Family meal">
               <IconUsers size={10} className="text-white" />
             </div>
           )}
@@ -125,6 +125,9 @@ export function MealSlot({
               {(() => { const Icon = mealTypeIcons[mealType]; return <Icon size={12} className="text-sand-400" />; })()}
               {displayRecipe.totalTimeMinutes > 0 && <span>{displayRecipe.totalTimeMinutes} min</span>}
             </p>
+            {isFamilyMeal && familyMeal && (
+              <VotingResultsBadge votes={familyMeal.votes} status={familyMeal.status} size="sm" />
+            )}
           </div>
 
           {/* Mark as Cooked Button - only for non-family meals for now */}

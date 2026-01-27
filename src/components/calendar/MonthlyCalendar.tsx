@@ -22,6 +22,7 @@ interface MonthlyCalendarProps {
   familyModeEnabled?: boolean;
   familyId?: string;
   familyMealPlans?: FamilyMealPlanWithDetails[];
+  recipeList?: Recipe[];
   onRemoveFamilyMeal?: (mealPlanId: string) => Promise<void>;
   onMealClick?: (data: MealClickData) => void;
 }
@@ -31,6 +32,7 @@ export function MonthlyCalendar({
   familyModeEnabled = false,
   familyId,
   familyMealPlans = [],
+  recipeList,
   onRemoveFamilyMeal,
   onMealClick,
 }: MonthlyCalendarProps) {
@@ -109,6 +111,7 @@ export function MonthlyCalendar({
             activeDropId={activeDropId}
             familyModeEnabled={familyModeEnabled}
             familyMealPlans={familyMealPlans}
+            recipeList={recipeList}
             onRemoveFamilyMeal={onRemoveFamilyMeal}
             onMealClick={onMealClick}
           />

@@ -406,6 +406,98 @@ export async function getUserRecipes(): Promise<{ data?: UserRecipe[]; error?: s
 }
 
 /**
+ * Get all recipes from family members (excluding current user's own)
+ * Returns recipes with owner attribution for display in the calendar sidebar
+ */
+export async function getFamilyRecipes(
+  familyId: string
+): Promise<{ data?: Array<Recipe & { ownerName: string }>; error?: string }> {
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return { error: 'You must be logged in to view family recipes' };
+    }
+
+    const { data, error } = await supabase.rpc('get_family_recipes', {
+      p_family_id: familyId,
+    });
+
+    if (error) {
+      console.error('Error fetching family recipes:', error);
+      return { error: error.message };
+    }
+
+    if (!data || data.length === 0) {
+      return { data: [] };
+    }
+
+    // Fetch ingredients for all family recipes in one query
+    const recipeIds = data.map((row: { recipe_id: string }) => row.recipe_id);
+    const { data: allIngredients } = await supabase
+      .from('recipe_ingredients')
+      .select('*')
+      .in('recipe_id', recipeIds)
+      .order('sort_order');
+
+    // Group ingredients by recipe
+    const ingredientsByRecipe = new Map<string, typeof allIngredients>();
+    allIngredients?.forEach((ing) => {
+      const existing = ingredientsByRecipe.get(ing.recipe_id) || [];
+      existing.push(ing);
+      ingredientsByRecipe.set(ing.recipe_id, existing);
+    });
+
+    // Transform rows into Recipe objects with ownerName
+    const recipes: Array<Recipe & { ownerName: string }> = data.map(
+      (row: {
+        recipe_id: string;
+        recipe_data: Record<string, unknown>;
+        owner_display_name: string;
+      }) => {
+        const rd = row.recipe_data;
+        const ings = ingredientsByRecipe.get(row.recipe_id) || [];
+
+        return {
+          id: row.recipe_id,
+          slug: (rd.slug || '') as string,
+          name: (rd.name || '') as string,
+          description: (rd.description || '') as string,
+          imageUrl: (rd.image_url || '') as string,
+          prepTimeMinutes: (rd.prep_time_minutes || 0) as number,
+          cookTimeMinutes: (rd.cook_time_minutes || 0) as number,
+          totalTimeMinutes: (rd.total_time_minutes || 0) as number,
+          servings: (rd.servings || 4) as number,
+          mealType: (rd.meal_type || 'dinner') as Recipe['mealType'],
+          cuisine: (rd.cuisine || 'Mediterranean') as string,
+          dietaryTags: (rd.dietary_tags || []) as Recipe['dietaryTags'],
+          difficulty: (rd.difficulty || 'medium') as Recipe['difficulty'],
+          ingredients: (ings as Record<string, unknown>[]).map((ing) => ({
+            id: ing.id as string,
+            ingredientId: ing.ingredient_id as string | null,
+            name: ing.display_name as string,
+            category: ing.category as string,
+            quantity: ing.quantity as number | null,
+            unit: ing.unit as string | null,
+            preparation: ing.preparation as string | null,
+            notes: ing.notes as string | null,
+          })),
+          instructions: [],
+          isFeatured: false,
+          ownerName: row.owner_display_name,
+        };
+      }
+    );
+
+    return { data: recipes };
+  } catch (error) {
+    console.error('Error in getFamilyRecipes:', error);
+    return { error: 'Failed to fetch family recipes. Please try again.' };
+  }
+}
+
+/**
  * Get a single user recipe by ID
  */
 export async function getUserRecipeById(
@@ -432,9 +524,25 @@ export async function getUserRecipeById(
     const recipe = result.recipe;
     const photos = result.photos || [];
 
-    // Verify ownership or that it's public/system
+    // Verify ownership, public/system, or family membership
     if (recipe.owner_id !== user.id && !recipe.is_public && !recipe.is_system) {
-      return { error: 'You do not have access to this recipe' };
+      // Check if user shares a family with the recipe owner
+      const { data: userFamilies } = await supabase
+        .from('family_members')
+        .select('family_id')
+        .eq('user_id', user.id);
+
+      const { data: ownerFamilies } = await supabase
+        .from('family_members')
+        .select('family_id')
+        .eq('user_id', recipe.owner_id);
+
+      const userFamilyIds = new Set((userFamilies || []).map((f: { family_id: string }) => f.family_id));
+      const isInSameFamily = (ownerFamilies || []).some((f: { family_id: string }) => userFamilyIds.has(f.family_id));
+
+      if (!isInSameFamily) {
+        return { error: 'You do not have access to this recipe' };
+      }
     }
 
     // Fetch ingredients

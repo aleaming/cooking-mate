@@ -23,6 +23,7 @@ interface CalendarDayProps {
   activeDropId: string | null;
   familyModeEnabled?: boolean;
   familyMealPlans?: FamilyMealPlanWithDetails[];
+  recipeList?: Recipe[];
   onRemoveFamilyMeal?: (mealPlanId: string) => Promise<void>;
   onMealClick?: (data: MealClickData) => void;
 }
@@ -34,6 +35,7 @@ export function CalendarDay({
   activeDropId,
   familyModeEnabled = false,
   familyMealPlans = [],
+  recipeList,
   onRemoveFamilyMeal,
   onMealClick,
 }: CalendarDayProps) {
@@ -91,15 +93,8 @@ export function CalendarDay({
           // Resolve the display recipe for click handler
           let displayRecipe: Recipe | null = null;
           if (familyModeEnabled && familyMeal) {
-            displayRecipe = allRecipes.find((r) => r.id === familyMeal.recipeId) || null;
-            if (!displayRecipe && familyMeal.recipeId.startsWith('user-')) {
-              displayRecipe = {
-                id: familyMeal.recipeId,
-                name: 'User Recipe',
-                totalTimeMinutes: 0,
-                mealType,
-              } as Recipe;
-            }
+            const list = recipeList?.length ? recipeList : allRecipes;
+            displayRecipe = list.find((r) => r.id === familyMeal.recipeId) || null;
           } else if (personalMeal?.recipe) {
             displayRecipe = personalMeal.recipe;
           }
@@ -113,6 +108,7 @@ export function CalendarDay({
               recipe={personalMeal?.recipe || null}
               familyMeal={familyMeal}
               familyModeEnabled={familyModeEnabled}
+              recipeList={recipeList}
               isActiveDropTarget={activeDropId === `${day.dateString}-${mealType}`}
               onRemove={
                 familyMeal && onRemoveFamilyMeal
@@ -146,6 +142,7 @@ interface DroppableMealSlotProps {
   recipe: Recipe | null;
   familyMeal?: FamilyMealPlanWithDetails | null;
   familyModeEnabled?: boolean;
+  recipeList?: Recipe[];
   isActiveDropTarget: boolean;
   onRemove?: () => void;
   onClick?: () => void;
@@ -158,6 +155,7 @@ function DroppableMealSlot({
   recipe,
   familyMeal,
   familyModeEnabled = false,
+  recipeList,
   isActiveDropTarget,
   onRemove,
   onClick,
@@ -179,6 +177,7 @@ function DroppableMealSlot({
         recipe={recipe}
         familyMeal={familyMeal}
         familyModeEnabled={familyModeEnabled}
+        recipeList={recipeList}
         date={dateString}
         isOver={isOver || isActiveDropTarget}
         onRemove={hasMeal ? onRemove : undefined}

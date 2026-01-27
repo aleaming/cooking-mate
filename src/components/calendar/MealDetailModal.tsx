@@ -1,10 +1,14 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Modal, Button, Badge } from '@/components/ui';
 import { MarkAsCookedButton } from '@/components/cooking-log';
+import { MealVoteCard } from '@/components/family';
+import { useFamilyStore } from '@/stores/useFamilyStore';
 import { Recipe, MealSlotType } from '@/types';
-import type { FamilyMealPlanWithDetails } from '@/types/family';
+import type { FamilyMealPlanWithDetails, MealPlanStatus } from '@/types/family';
+import { ReplacementRecipePickerModal } from './ReplacementRecipePickerModal';
 import {
   IconClock,
   IconFlame,
@@ -14,6 +18,7 @@ import {
   IconX,
   IconExternalLink,
   IconTrash,
+  IconArrowsExchange,
 } from '@tabler/icons-react';
 
 interface MealDetailModalProps {
@@ -24,6 +29,9 @@ interface MealDetailModalProps {
   mealType: MealSlotType;
   familyMeal?: FamilyMealPlanWithDetails | null;
   onRemove: () => void;
+  onVoteSuccess?: () => void;
+  onReplaceMeal?: (newRecipe: Recipe) => void;
+  recipes?: Recipe[];
 }
 
 const difficultyConfig: Record<string, { label: string; variant: 'olive' | 'warning' | 'error' }> = {
@@ -46,7 +54,23 @@ export function MealDetailModal({
   mealType,
   familyMeal,
   onRemove,
+  onVoteSuccess,
+  onReplaceMeal,
+  recipes = [],
 }: MealDetailModalProps) {
+  const { permissions, activeFamilyMembers } = useFamilyStore();
+
+  const [localStatus, setLocalStatus] = useState<MealPlanStatus | undefined>(familyMeal?.status);
+  const [showReplacementPicker, setShowReplacementPicker] = useState(false);
+
+  useEffect(() => {
+    setLocalStatus(familyMeal?.status);
+  }, [familyMeal?.status]);
+
+  const totalVoters = activeFamilyMembers.filter(
+    (m) => m.role === 'owner' || m.role === 'admin' || m.role === 'voter'
+  ).length;
+
   const formattedDate = new Date(date + 'T12:00:00').toLocaleDateString('en-US', {
     weekday: 'long',
     month: 'long',
@@ -58,6 +82,7 @@ export function MealDetailModal({
     onClose();
   };
 
+  const effectiveStatus = localStatus || familyMeal?.status;
   const difficulty = recipe.difficulty ? difficultyConfig[recipe.difficulty] : null;
   const hasTimingInfo = recipe.prepTimeMinutes > 0 || recipe.cookTimeMinutes > 0 || recipe.totalTimeMinutes > 0;
   const hasIngredients = recipe.ingredients && recipe.ingredients.length > 0;
@@ -185,6 +210,41 @@ export function MealDetailModal({
           </div>
         )}
 
+        {/* Family Voting */}
+        {familyMeal && (
+          <div className="p-4 bg-sand-50 rounded-xl border border-sand-100">
+            <h3 className="font-display text-sm font-semibold text-olive-900 mb-3">
+              Family Vote
+            </h3>
+            <MealVoteCard
+              mealPlanId={familyMeal.id}
+              votes={familyMeal.votes}
+              status={effectiveStatus || familyMeal.status}
+              totalVoters={totalVoters}
+              canVote={permissions?.canVote || false}
+              canApprove={permissions?.canApproveMeals || false}
+              onVoteSuccess={onVoteSuccess}
+              onStatusChange={(newStatus) => {
+                setLocalStatus(newStatus);
+                onVoteSuccess?.();
+              }}
+            />
+          </div>
+        )}
+
+        {/* Suggest Replacement for rejected meals */}
+        {familyMeal && effectiveStatus === 'rejected' && permissions?.canProposeMeals && (
+          <Button
+            variant="secondary"
+            size="md"
+            onClick={() => setShowReplacementPicker(true)}
+            leftIcon={<IconArrowsExchange size={18} />}
+            className="w-full"
+          >
+            Suggest Replacement
+          </Button>
+        )}
+
         {/* Ingredients Preview */}
         {hasIngredients && (
           <div>
@@ -232,12 +292,14 @@ export function MealDetailModal({
           </Button>
         </Link>
         <div className="flex gap-2">
-          <MarkAsCookedButton
-            recipe={recipe}
-            date={date}
-            mealType={mealType}
-            size="md"
-          />
+          {!familyMeal && (
+            <MarkAsCookedButton
+              recipe={recipe}
+              date={date}
+              mealType={mealType}
+              size="md"
+            />
+          )}
           <Button
             variant="outline"
             size="md"
@@ -248,6 +310,19 @@ export function MealDetailModal({
           </Button>
         </div>
       </div>
+
+      {/* Replacement Recipe Picker */}
+      <ReplacementRecipePickerModal
+        isOpen={showReplacementPicker}
+        onClose={() => setShowReplacementPicker(false)}
+        recipes={recipes}
+        currentRecipeId={recipe.id}
+        mealType={mealType}
+        onSelectRecipe={(newRecipe) => {
+          setShowReplacementPicker(false);
+          onReplaceMeal?.(newRecipe);
+        }}
+      />
     </Modal>
   );
 }
